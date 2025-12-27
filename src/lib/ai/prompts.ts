@@ -167,6 +167,12 @@ Let's start with {{first_topic}}."
 - Then IMMEDIATELY ask your first question - don't wait for confirmation
 
 ## PHASE 2: TECHNICAL TOPICS (50 minutes)
+**CRITICAL: THIS PHASE IS FOR TECHNICAL QUESTIONS ONLY - NO BEHAVIORAL QUESTIONS**
+- Do NOT ask behavioral questions during this phase
+- Do NOT ask about teamwork, culture fit, or soft skills during technical discussion
+- Focus ONLY on technical knowledge, problem-solving, and incident handling
+- Behavioral questions will be asked in Phase 3 (Wrap-Up) ONLY
+
 **REAL INTERVIEWER PROGRESSION - FOLLOW THIS STRUCTURE:**
 
 **TOPIC PROGRESSION LOGIC:**
@@ -257,12 +263,44 @@ Let's start with {{first_topic}}."
 
 **Topic Transition**: After covering a topic, briefly transition: "Great, let's move on to [next topic]." But feel free to skip topics they don't have experience with.
 
-## PHASE 3: WRAP-UP (5 minutes)
+## PHASE 3: WRAP-UP (5-10 minutes) - BEHAVIORAL QUESTIONS ONLY
 **CRITICAL: Only enter wrap-up phase after at least 45-50 minutes of technical discussion.**
 - Do NOT wrap up early, even if you've covered topics
 - The interview should last approximately 1 hour
-- Only ask "Do you have any questions for me?" when you've thoroughly covered the technical topics
-- If the candidate asks to end early, that's fine, but don't initiate early ending yourself
+- **BEHAVIORAL QUESTIONS MUST BE ASKED IN THIS PHASE ONLY - NOT BEFORE**
+- Do NOT ask behavioral questions during technical discussion (Phase 2)
+- Only ask behavioral/cultural fit questions in the wrap-up phase
+
+### Step 1: Behavioral Questions (3-5 minutes)
+**CRITICAL: Ask behavioral questions ONLY in wrap-up, not during technical discussion.**
+
+**Behavioral Question Guidelines:**
+- Ask 2-3 behavioral questions based on company culture (if JD provided) or general fit
+- Focus on: teamwork, handling pressure, conflict resolution, learning/growth mindset
+- If JD mentions company culture/values, tailor questions to those values
+- Examples (adapt based on company culture from JD):
+  * "Tell me about a time you had to work under pressure during a critical incident. How did you handle it?"
+  * "Describe a situation where you had to collaborate with a difficult team member or stakeholder."
+  * "Give me an example of how you've handled a disagreement with a colleague about a technical approach."
+  * "Tell me about a time you had to learn a new technology quickly to solve a problem."
+  * "Describe a situation where you had to balance technical perfection with business deadlines."
+
+**If JD Provided - Company Culture-Based Questions:**
+{{behavioral_questions_from_culture}}
+
+**If No JD - General Behavioral Questions:**
+- Use standard behavioral questions focusing on teamwork, pressure handling, and problem-solving
+- Keep questions relevant to DevOps/SRE role
+
+### Step 2: Candidate Questions (2-3 minutes)
+- Ask: "Do you have any questions for me about the role, team, or company?"
+- Answer briefly and professionally
+- Keep responses concise (1-2 sentences per question)
+
+### Step 3: Closing
+- Thank them for their time
+- Let them know next steps (if applicable)
+- End the interview professionally
 
 # EVALUATION RUBRICS (Assess throughout)
 
@@ -504,6 +542,69 @@ ${rolePrompt.commonScenarios.map(scenario => `- ${scenario}`).join('\n')}`
         jdGapAnalysis = 'No JD gap analysis available. Focus on testing depth of knowledge.'
     }
 
+    // Generate behavioral questions based on company culture (for wrap-up phase only)
+    let behavioralQuestionsFromCulture = ''
+    if (hasJD && ctx.parsedJD && ctx.parsedJD.companyCulture) {
+        const culture = ctx.parsedJD.companyCulture.toLowerCase()
+        const questions: string[] = []
+
+        // Generate questions based on culture keywords
+        if (culture.includes('collaborat') || culture.includes('team')) {
+            questions.push('"Tell me about a time you had to collaborate with a difficult team member or stakeholder during a critical incident. How did you handle it?"')
+        }
+        if (culture.includes('innov') || culture.includes('creativ') || culture.includes('experiment')) {
+            questions.push('"Describe a situation where you had to innovate or think creatively to solve a problem when standard solutions weren\'t working."')
+        }
+        if (culture.includes('fast') || culture.includes('agile') || culture.includes('startup')) {
+            questions.push('"Give me an example of how you\'ve balanced technical perfection with the need to move quickly and meet tight deadlines."')
+        }
+        if (culture.includes('customer') || culture.includes('user') || culture.includes('client')) {
+            questions.push('"Tell me about a time you had to prioritize customer needs over technical preferences. How did you make that decision?"')
+        }
+        if (culture.includes('learn') || culture.includes('growth') || culture.includes('develop')) {
+            questions.push('"Describe a situation where you had to quickly learn a new technology or tool to solve a critical problem. How did you approach it?"')
+        }
+        if (culture.includes('ownership') || culture.includes('accountable') || culture.includes('responsib')) {
+            questions.push('"Give me an example of a time you took ownership of a problem that wasn\'t technically your responsibility. What was the outcome?"')
+        }
+        if (culture.includes('communicat') || culture.includes('transparent') || culture.includes('open')) {
+            questions.push('"Tell me about a time you had to communicate a complex technical issue to a non-technical stakeholder during an incident. How did you approach it?"')
+        }
+
+        // If no specific matches, use general behavioral questions
+        if (questions.length === 0) {
+            questions.push(
+                '"Tell me about a time you had to work under significant pressure during a critical production incident. How did you handle it?"',
+                '"Describe a situation where you had to collaborate with someone who had a different technical approach than you. How did you resolve the disagreement?"',
+                '"Give me an example of how you\'ve handled a situation where you had to learn something new quickly to solve a problem."'
+            )
+        }
+
+        behavioralQuestionsFromCulture = `**Company Culture from JD**: ${ctx.parsedJD.companyCulture}
+
+**Behavioral Questions to Ask (choose 2-3):**
+${questions.slice(0, 5).map((q, i) => `${i + 1}. ${q}`).join('\n')}
+
+**Instructions:**
+- Ask these questions ONLY in the wrap-up phase (after 45-50 minutes of technical discussion)
+- Adapt the questions to feel natural in conversation
+- Focus on their actual experiences, not hypotheticals
+- Listen for alignment with company culture/values`
+    } else {
+        behavioralQuestionsFromCulture = `**No JD provided - Use General Behavioral Questions:**
+
+Ask 2-3 of these questions in wrap-up phase:
+1. "Tell me about a time you had to work under significant pressure during a critical production incident. How did you handle it?"
+2. "Describe a situation where you had to collaborate with a difficult team member or stakeholder. How did you handle it?"
+3. "Give me an example of how you've handled a disagreement with a colleague about a technical approach."
+4. "Tell me about a time you had to learn a new technology quickly to solve a problem. How did you approach it?"
+5. "Describe a situation where you had to balance technical perfection with business deadlines."
+
+**Instructions:**
+- Ask these questions ONLY in the wrap-up phase (after 45-50 minutes of technical discussion)
+- Focus on their actual experiences, not hypotheticals`
+    }
+
     // Get interview structure and topic incident prompts
     const interviewStructure = getInterviewStructure(ctx.targetRole)
     const topics = interviewStructure.topics
@@ -594,15 +695,35 @@ ${rolePrompt.commonScenarios.map(scenario => `- ${scenario}`).join('\n')}`
     const buildExampleScenarios = (topic: InterviewTopic | undefined, topicName: string): string => {
         if (!topic) return `Example: Generic ${topicName} incident scenario`
 
+        // Extract candidate technologies
+        const candidateTech: string[] = []
+        try {
+            const userSkillsParsed = JSON.parse(ctx.userSkills || '[]') as string[]
+            candidateTech.push(...userSkillsParsed)
+        } catch (e) {
+            // Fallback
+        }
+        if (ctx.parsedJD?.tools) {
+            candidateTech.push(...ctx.parsedJD.tools)
+        }
+        
+        const jdTech = ctx.parsedJD?.tools || []
+        const level = ctx.targetRole.toLowerCase().includes('entry') ? 'entry' :
+                     ctx.targetRole.toLowerCase().includes('architect') ? 'architect' :
+                     ctx.targetRole.toLowerCase().includes('senior') ? 'senior' : 'mid'
+
+        // Generate dynamic incident prompt based on candidate context
+        const dynamicPrompt = topic.generateIncidentPrompt(candidateTech, jdTech, level)
+
         // Provide multiple example scenarios, not just one
         const examples = [
-            topic.incidentPrompt,
+            dynamicPrompt,
             // Add variation hints
-            `Variation: Adapt this scenario to match candidate's mentioned technologies (e.g., if they use EKS, ask about EKS-specific issues)`,
-            `Variation: Create similar scenarios but with different failure modes (network issues, resource constraints, configuration errors, etc.)`
+            `Variation: Further adapt this scenario to match candidate's specific tech stack (e.g., if they use EKS, ask about EKS-specific networking issues)`,
+            `Variation: Create similar scenarios but with different failure modes (network issues, resource constraints, configuration errors, security incidents, etc.)`
         ]
 
-        return `EXAMPLE SCENARIOS (adapt to candidate's background):\n${examples.map((e, i) => `${i + 1}. ${e}`).join('\n')}`
+        return `EXAMPLE SCENARIOS (already adapted to candidate's background, but create unique variations):\n${examples.map((e, i) => `${i + 1}. ${e}`).join('\n')}`
     }
 
     let prompt = ALEX_PERSONA_PROMPT
@@ -623,6 +744,7 @@ ${rolePrompt.commonScenarios.map(scenario => `- ${scenario}`).join('\n')}`
         .replace('{{expert_scenarios}}', expertScenariosText)
         .replace('{{question_bank_scenarios}}', questionBankScenarios)
         .replace('{{previous_questions_list}}', previousQuestionsList)
+        .replace('{{behavioral_questions_from_culture}}', behavioralQuestionsFromCulture)
         .replace('{{kubernetes_incident_prompt}}', buildExampleScenarios(kubernetesTopic, 'Kubernetes'))
         .replace('{{kubernetes_jd_note}}', buildJDNote('kubernetes', 'Kubernetes'))
         .replace('{{kubernetes_focus}}', `Focus areas: ${getTopicFocus('kubernetes')}`)
