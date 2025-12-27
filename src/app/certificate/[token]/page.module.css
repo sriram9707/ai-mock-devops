@@ -1,0 +1,179 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+    padding: 2rem 1rem;
+}
+
+.certificateCard {
+    background: var(--card);
+    padding: 4rem 3rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--card-shadow-lg);
+    width: 100%;
+    max-width: 800px;
+    border: 2px solid var(--card-border);
+    position: relative;
+    overflow: hidden;
+}
+
+.certificateCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: var(--accent-gradient);
+}
+
+.certificateHeader {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.certificateIcon {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 1.5rem;
+    border-radius: var(--radius-full);
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+}
+
+.certificateTitle {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.certificateSubtitle {
+    color: var(--muted);
+    font-size: 1.125rem;
+}
+
+.certificateBody {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+    border-top: 2px solid var(--border);
+    border-bottom: 2px solid var(--border);
+}
+
+.userName {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    color: var(--foreground);
+    margin-bottom: 1rem;
+}
+
+.achievement {
+    font-size: 1.125rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+}
+
+.certificateName {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 2rem;
+}
+
+.scoreSection {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem 2.5rem;
+    background: var(--accent-light);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--primary-light);
+}
+
+.scoreLabel {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.scoreValue {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.certificateFooter {
+    margin-bottom: 2rem;
+}
+
+.footerInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.infoItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--muted);
+    font-size: 0.9375rem;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.button {
+    padding: 1rem 2rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    text-align: center;
+    background: var(--accent-gradient);
+    color: var(--primary-foreground);
+    transition: all var(--transition-base);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
+}
+
+.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.4);
+}
+
+@media (max-width: 768px) {
+    .certificateCard {
+        padding: 2.5rem 1.5rem;
+    }
+
+    .scoreSection {
+        padding: 1rem 1.5rem;
+    }
+
+    .scoreValue {
+        font-size: 2rem;
+    }
+}
+

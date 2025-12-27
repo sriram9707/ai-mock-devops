@@ -1,0 +1,206 @@
+.container {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+    border: 1px solid #e5e7eb;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.header h3 {
+    margin: 0.5rem 0;
+    font-size: 1.5rem;
+    color: #111827;
+}
+
+.header p {
+    color: #6b7280;
+    margin: 0;
+}
+
+.icon {
+    width: 48px;
+    height: 48px;
+    color: #3b82f6;
+    margin: 0 auto 1rem;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.field label {
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.95rem;
+}
+
+.starRating {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.star {
+    background: none;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #9ca3af;
+}
+
+.star:hover {
+    border-color: #3b82f6;
+    transform: scale(1.1);
+}
+
+.star.active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.toggleGroup {
+    display: flex;
+    gap: 1rem;
+}
+
+.toggle {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.toggle:hover {
+    border-color: #3b82f6;
+}
+
+.toggle.active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.npsScale {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.npsButton {
+    width: 48px;
+    height: 48px;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    font-weight: 600;
+    color: #6b7280;
+    transition: all 0.2s;
+}
+
+.npsButton:hover {
+    border-color: #3b82f6;
+    transform: scale(1.1);
+}
+
+.npsButton.active {
+    border-color: #3b82f6;
+    background: #3b82f6;
+    color: white;
+}
+
+.npsLabels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+}
+
+.textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    resize: vertical;
+    transition: border-color 0.2s;
+}
+
+.textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.submitButton {
+    padding: 0.875rem 2rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+}
+
+.submitButton:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.submitButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.success {
+    text-align: center;
+    padding: 2rem;
+}
+
+.successIcon {
+    width: 64px;
+    height: 64px;
+    color: #10b981;
+    margin: 0 auto 1rem;
+}
+
+.success h3 {
+    margin: 0.5rem 0;
+    color: #111827;
+}
+
+.success p {
+    color: #6b7280;
+    margin: 0;
+}
+

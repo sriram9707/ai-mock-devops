@@ -1,0 +1,176 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String       @id @default(uuid())
+  email     String       @unique
+  name      String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  
+  profile   UserProfile?
+  credits   UserCredit?
+  sessions  InterviewSession[]
+  orders    Order[]
+  certificates Certificate[]
+}
+
+model UserProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  
+  roles     String   // JSON array of strings: "DevOps Engineer", "SRE", etc.
+  level     String   // "Junior", "Senior", etc.
+  skills    String   // JSON array of strings: "AWS", "Kubernetes", etc.
+  cvUrl     String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InterviewPack {
+  id              String   @id @default(uuid())
+  title           String
+  description     String
+  role            String   // "DevOps", "SRE", "CloudArchitect"
+  level           String   // "Entry", "Senior", etc.
+  durationMinutes Int
+  price           Float    
+  
+  sections        String   // JSON: array of { title, duration, competencies[], questions[] }
+  
+  sessions        InterviewSession[]
+  orders          Order[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  packId    String
+  pack      InterviewPack @relation(fields: [packId], references: [id])
+  
+  status    String   // "PURCHASED", "USED"
+  amount    Float
+  
+  // Retake Tracking
+  attemptsTotal Int      @default(3) // Default 3 attempts per pack purchase
+  attemptsUsed  Int      @default(0) // Increments on interview start/finish
+
+  createdAt DateTime @default(now())
+}
+
+model InterviewSession {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  packId      String
+  pack        InterviewPack @relation(fields: [packId], references: [id])
+  
+  // Customization
+  jdRaw       String?  // Optional raw JD text
+  jdParsed    String?  // Optional JSON: { role, tools[], ... }
+  isPractice  Boolean  @default(false) // Practice mode: no scoring, can restart
+  
+  status      String   // "PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"
+  startedAt   DateTime?
+  endedAt     DateTime?
+  
+  turns       InterviewTurn[]
+  result      InterviewResult?
+  certificate Certificate?
+  feedback    InterviewFeedback?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model InterviewTurn {
+  id          String   @id @default(uuid())
+  sessionId   String
+  session     InterviewSession @relation(fields: [sessionId], references: [id])
+  
+  role        String   // "interviewer", "candidate"
+  message     String
+  audioUrl    String?
+  
+  // Metadata for analysis
+  section     String?
+  competency  String?
+  difficulty  String?
+  
+  // Question tracking
+  isQuestion  Boolean  @default(false) // True if this turn contains a question from interviewer
+  questionHash String? // Hash of the question for deduplication
+  
+  createdAt   DateTime @default(now())
+}
+
+model InterviewResult {
+  id               String   @id @default(uuid())
+  sessionId        String   @unique
+  session          InterviewSession @relation(fields: [sessionId], references: [id])
+  
+  overallScore     Float
+  competencyScores String   // JSON: { "incident_response": 8.0, ... }
+  strengths        String   // JSON array
+  improvements     String   // JSON array
+  upskillingPlan   String   // JSON: { weeks, focus_areas[], ... }
+  
+  feedback         String?  // General summary
+  
+  createdAt        DateTime @default(now())
+}
+
+model UserCredit {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id])
+  
+  amount         Int      @default(3) // Start with 3 credits
+  lastRefillDate DateTime @default(now())
+  
+  updatedAt      DateTime @updatedAt
+}
+
+model Certificate {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  sessionId   String   @unique
+  session     InterviewSession @relation(fields: [sessionId], references: [id])
+  
+  title       String   // "Certified DevOps Engineer - Level 1"
+  score       Float
+  issuedAt    DateTime @default(now())
+  shareToken  String   @unique @default(cuid()) // For public sharing URL
+}
+
+model InterviewFeedback {
+  id                String   @id @default(uuid())
+  sessionId         String   @unique
+  session           InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId            String
+  
+  scoringAccuracy   Int      // 1-5 scale
+  questionRealism   Boolean  // Did questions feel realistic?
+  wouldRetake       Boolean  // Would they retake?
+  wouldRecommend    Int      // NPS: 0-10
+  overallRating     Int      // 1-5 scale
+  improvements      String?  // Open text feedback
+  
+  createdAt         DateTime @default(now())
+}

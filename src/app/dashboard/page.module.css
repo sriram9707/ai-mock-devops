@@ -1,0 +1,279 @@
+/* Layout */
+.container {
+    min-height: 100vh;
+    padding: 4rem 0 6rem;
+    background: var(--background);
+}
+
+/* Hero - Modern Style */
+.hero {
+    padding: 4rem 0 5rem;
+    text-align: left;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+    border-radius: var(--radius-xl);
+    margin-bottom: 4rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--accent-gradient);
+}
+
+.title {
+    font-size: clamp(3rem, 6vw, 5rem);
+    line-height: 1.1;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
+    max-width: 90%;
+}
+
+.title .italic {
+    font-style: italic;
+}
+
+.subtitle {
+    font-size: 1.25rem;
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.7;
+    font-weight: 400;
+    margin-bottom: 2rem;
+}
+
+.headerActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.navButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    color: var(--foreground);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all var(--transition-base);
+}
+
+.navButton:hover {
+    background: var(--accent-gradient);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-lg);
+}
+
+/* Grid - Modern Cards */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 2rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2.5rem;
+    min-height: 420px;
+    text-decoration: none;
+    cursor: pointer;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-base);
+    box-shadow: var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--accent-gradient);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+/* Hover Effect: Modern */
+.card:hover {
+    background: var(--card-hover);
+    border-color: var(--primary-light);
+    box-shadow: var(--card-shadow-lg);
+    transform: translateY(-8px);
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+.card:hover .cardTitle {
+    color: var(--primary);
+}
+
+.card:hover .meta {
+    color: var(--muted);
+}
+
+.card:hover .cardFooter {
+    border-top-color: var(--primary-light);
+}
+
+.card:hover .btn-arrow {
+    color: var(--primary);
+    transform: translate(4px, -4px);
+}
+
+/* Internal Card Typography */
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.index {
+    font-family: var(--font-heading);
+    font-size: 4rem;
+    font-weight: 800;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    transition: all var(--transition-base);
+    opacity: 0.3;
+}
+
+.card:hover .index {
+    opacity: 0.5;
+}
+
+.roleTag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--accent-light);
+    color: var(--primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-full);
+    border: none;
+    transition: all var(--transition-base);
+}
+
+.card:hover .roleTag {
+    background: var(--accent-gradient);
+    color: white;
+}
+
+.cardTitle {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    margin-top: auto;
+    max-width: 90%;
+    color: var(--foreground);
+    transition: color var(--transition-base);
+}
+
+.meta {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+    margin-bottom: 2rem;
+    transition: color var(--transition-base);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.cardFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+    margin-top: auto;
+    transition: border-color var(--transition-base);
+}
+
+.actionText {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--primary);
+    transition: color var(--transition-base);
+}
+
+.btn-arrow {
+    transition: all var(--transition-base);
+    color: var(--muted);
+}
+
+/* Retake & Action Styles */
+.attemptsBadge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    margin-top: 0.5rem;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.actionButton {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--primary);
+    transition: color var(--transition-base);
+    width: 100%;
+}
+
+.actionButton:hover {
+    color: var(--primary-dark);
+}
+
+.actionButton:hover .btn-arrow {
+    transform: translate(4px, -4px);
+    color: var(--primary);
+}

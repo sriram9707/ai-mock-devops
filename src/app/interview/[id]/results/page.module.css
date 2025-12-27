@@ -1,0 +1,386 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+    padding: 2rem 1rem;
+}
+
+.card {
+    background: var(--card);
+    padding: 3.5rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--card-shadow-lg);
+    width: 100%;
+    max-width: 800px;
+    border: 1px solid var(--card-border);
+    animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--accent-gradient);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+
+.header h1 {
+    font-size: clamp(2rem, 4vw, 2.5rem);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 1.125rem;
+    line-height: 1.6;
+}
+
+.scoreSection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    margin-bottom: 3.5rem;
+    padding-bottom: 3rem;
+    border-bottom: 2px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.scoreCircle {
+    width: 140px;
+    height: 140px;
+    border-radius: var(--radius-full);
+    background: var(--card);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+    position: relative;
+    border: 6px solid var(--primary);
+}
+
+.scoreValue {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    position: relative;
+    z-index: 1;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.scoreLabel {
+    font-size: 0.875rem;
+    color: var(--muted);
+    position: relative;
+    z-index: 1;
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+.scoreMessage h2 {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.excellent {
+    color: var(--success);
+}
+
+.good {
+    color: var(--warning);
+}
+
+.needsImprovement {
+    color: var(--error);
+}
+
+.feedbackSection,
+.recommendationsSection,
+.seniorityTable {
+    margin-top: 1.5rem;
+}
+
+.gapTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.gapTable thead {
+    background: var(--accent-light);
+}
+
+.gapTable th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--foreground);
+    border-bottom: 2px solid var(--border);
+}
+
+.gapTable td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+}
+
+.gapTable tbody tr:hover {
+    background: var(--accent-light);
+}
+
+.gapTable td:last-child {
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.gapTable .senior {
+    color: #10b981;
+}
+
+.gapTable .medior {
+    color: #f59e0b;
+}
+
+.gapTable .borderline {
+    color: #6366f1;
+}
+
+.rubricSection {
+    margin-bottom: 2.5rem;
+}
+
+.rubricGrid {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.rubricItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.rubricHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rubricName {
+    font-weight: 600;
+    color: var(--foreground);
+    font-size: 1rem;
+}
+
+.rubricScore {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--primary);
+}
+
+.rubricBar {
+    width: 100%;
+    height: 10px;
+    background: var(--border-light);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.rubricFill {
+    height: 100%;
+    background: var(--accent-gradient);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.icon {
+    color: var(--primary);
+    width: 24px;
+    height: 24px;
+}
+
+.sectionHeader h3 {
+    font-size: 1.375rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.feedbackText {
+    line-height: 1.7;
+    color: var(--foreground);
+    background: var(--accent-light);
+    padding: 1.75rem;
+    border-radius: var(--radius-lg);
+    border-left: 4px solid var(--primary);
+    font-size: 0.9375rem;
+}
+
+.list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.list li {
+    padding: 0.875rem 1.25rem;
+    background: var(--accent-light);
+    border-radius: var(--radius);
+    border-left: 3px solid var(--primary);
+    color: var(--foreground);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+.shareSection {
+    margin-bottom: 2rem;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 3.5rem;
+    flex-wrap: wrap;
+}
+
+.button {
+    flex: 1;
+    min-width: 200px;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    text-align: center;
+    background: var(--accent-gradient);
+    color: var(--primary-foreground);
+    transition: all var(--transition-base);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
+    border: none;
+    cursor: pointer;
+    font-size: 0.9375rem;
+}
+
+.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.4);
+}
+
+.secondary {
+    background: transparent;
+    color: var(--foreground);
+    border: 2px solid var(--border);
+    box-shadow: none;
+}
+
+.secondary:hover {
+    background: var(--accent-light);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+}
+
+/* Practice Mode Styles */
+.practiceMessage {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.practiceIcon {
+    margin: 0 auto 1.5rem;
+    width: 96px;
+    height: 96px;
+    border-radius: var(--radius-full);
+    background: var(--accent-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+}
+
+.practiceMessage h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--foreground);
+}
+
+.practiceMessage p {
+    color: var(--muted-foreground);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.practiceActions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.practiceButton {
+    background: var(--accent-gradient);
+    color: var(--primary-foreground);
+    padding: 0.875rem 2rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--transition-base);
+    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
+    display: inline-block;
+}
+
+.practiceButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.4);
+}
+
+@media (max-width: 600px) {
+    .scoreSection {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+    
+    .practiceActions {
+        flex-direction: column;
+    }
+}

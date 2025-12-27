@@ -1,0 +1,350 @@
+.container {
+    min-height: 100vh;
+    padding: 2rem 1.5rem 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 1.125rem;
+}
+
+.backButton {
+    padding: 0.75rem 1.5rem;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    color: var(--foreground);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all var(--transition-base);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.backButton:hover {
+    background: var(--card-hover);
+    border-color: var(--primary-light);
+    transform: translateX(-4px);
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.statCard {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: var(--card-shadow);
+    transition: all var(--transition-base);
+}
+
+.statCard:hover {
+    box-shadow: var(--card-shadow-lg);
+    transform: translateY(-2px);
+}
+
+.statIcon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius);
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.statContent {
+    flex: 1;
+}
+
+.statValue {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+    color: var(--foreground);
+}
+
+.statLabel {
+    font-size: 0.875rem;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.trendUp {
+    color: var(--success);
+}
+
+.trendDown {
+    color: var(--error);
+}
+
+.trendStable {
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.chartCard,
+.competencyCard,
+.activityCard {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.sectionTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--foreground);
+}
+
+.chartContainer {
+    margin-top: 2rem;
+}
+
+.chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    height: 300px;
+    padding: 1rem 0;
+}
+
+.barContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.bar {
+    width: 100%;
+    max-width: 60px;
+    background: var(--accent-gradient);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    transition: all var(--transition-base);
+    cursor: pointer;
+    min-height: 4px;
+}
+
+.bar:hover {
+    opacity: 0.8;
+    transform: scaleY(1.05);
+}
+
+.barLabel {
+    margin-top: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--foreground);
+}
+
+.barDate {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+}
+
+.competencyList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.competencyItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.competencyHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.competencyName {
+    font-weight: 600;
+    color: var(--foreground);
+    font-size: 1rem;
+}
+
+.competencyScore {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.scoreValue {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--foreground);
+}
+
+.progressBar {
+    width: 100%;
+    height: 8px;
+    background: var(--border-light);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: var(--accent-gradient);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+}
+
+.areasGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.areaCard {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.areaHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.areaTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--foreground);
+}
+
+.weakIcon {
+    color: var(--error);
+}
+
+.strongIcon {
+    color: var(--success);
+}
+
+.areaList {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.areaItem {
+    padding: 0.75rem 1rem;
+    background: var(--accent-light);
+    border-radius: var(--radius);
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.activityList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activityItem {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem;
+    background: var(--accent-light);
+    border-radius: var(--radius);
+    transition: all var(--transition-base);
+}
+
+.activityItem:hover {
+    background: var(--card-hover);
+    transform: translateX(4px);
+}
+
+.activityDate {
+    font-size: 0.875rem;
+    color: var(--muted);
+    font-weight: 500;
+    min-width: 120px;
+}
+
+.activityContent {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.activityTitle {
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.activityScore {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1.125rem;
+}
+
+@media (max-width: 768px) {
+    .chart {
+        height: 200px;
+        gap: 0.5rem;
+    }
+
+    .bar {
+        max-width: 40px;
+    }
+
+    .activityContent {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
