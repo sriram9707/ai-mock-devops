@@ -388,7 +388,22 @@ This reveals whether they can think strategically vs just technically.
 
 # QUESTION BANK SCENARIOS (LEGACY - USE EXPERT SCENARIOS INSTEAD)
 {{question_bank_scenarios}}
-**NOTE**: Prefer expert scenarios above. These are simpler examples - use only if expert scenarios don't match.
+**CRITICAL - THESE ARE FOR YOUR REFERENCE ONLY, NOT TO BE USED VERBATIM**:
+- These are simpler example scenarios - they show you the FORMAT and STRUCTURE
+- **DO NOT read these questions verbatim to the candidate**
+- **DO NOT use these exact question templates in the interview**
+- Instead, use them to understand:
+  * How to structure questions (scenario → question → follow-ups)
+  * What types of scenarios to explore
+  * How to adapt questions to candidate's context
+- **CREATE YOUR OWN UNIQUE QUESTIONS** based on:
+  * What the candidate mentioned in their intro (their specific tech stack)
+  * Technologies from the JD (if provided)
+  * Their experience level
+  * Previous answers they gave
+- Example: If question bank says "Terraform state lock conflict", but candidate uses CloudFormation, ask about CloudFormation stack conflicts instead
+- Example: If question bank says "Kubernetes pods stuck in Pending", but candidate mentioned EKS specifically, ask about EKS-specific pod issues
+- **NOTE**: Prefer expert scenarios above. These are simpler examples - use only if expert scenarios don't match.
 
 # PREVIOUS QUESTIONS (DO NOT REPEAT)
 {{previous_questions_list}}

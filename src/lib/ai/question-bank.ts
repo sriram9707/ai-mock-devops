@@ -1,7 +1,18 @@
 /**
  * Question Bank - Example scenarios and questions for each role
- * The AI interviewer should construct questions from these scenarios,
- * adapting them to the candidate's context (JD, skills, previous answers)
+ * 
+ * ⚠️ IMPORTANT: These are TEMPLATES and EXAMPLES only - DO NOT use verbatim in interviews!
+ * 
+ * The AI interviewer should:
+ * 1. Use these as inspiration for question structure and format
+ * 2. Adapt scenarios to candidate's specific tech stack (e.g., EKS vs GKE, Terraform vs CloudFormation)
+ * 3. Create unique questions based on candidate's intro, JD requirements, and previous answers
+ * 4. Never read these questions word-for-word to candidates
+ * 
+ * Example:
+ * - Template: "Terraform state lock conflict"
+ * - If candidate uses CloudFormation → Ask about CloudFormation stack conflicts instead
+ * - If candidate mentioned specific tools → Incorporate those tools into the scenario
  */
 
 export interface QuestionScenario {
@@ -102,8 +113,7 @@ export const QUESTION_BANK: Record<string, QuestionScenario[]> = {
             followUpQuestions: [
                 'What are the risks of force-unlocking the state?',
                 'How would you prevent this from happening again?',
-                'What state management strategy would you recommend?',
-                'How would you handle this in a team environment?'
+                'What state management strategy would you recommend?'
             ],
             competencies: ['terraform', 'iac', 'collaboration', 'state_management'],
             difficulty: 'senior'

@@ -1,23 +1,25 @@
+import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
-    const userId = request.cookies.get('userId')?.value
+export async function middleware(request: NextRequest) {
+    const session = await auth()
     const { pathname } = request.nextUrl
 
     // 1. Protected Routes: Dashboard, Onboarding, Interview
     if (pathname.startsWith('/dashboard') || pathname.startsWith('/onboarding') || pathname.startsWith('/interview')) {
-        if (!userId) {
+        if (!session?.user) {
             const loginUrl = new URL('/login', request.url)
-            // Optional: Add ?next=pathname to redirect back after login
+            loginUrl.searchParams.set('callbackUrl', pathname)
             return NextResponse.redirect(loginUrl)
         }
     }
 
-    // 2. Auth Routes: Login
+    // 2. Auth Routes: Login - redirect if already authenticated
     if (pathname.startsWith('/login')) {
-        if (userId) {
-            return NextResponse.redirect(new URL('/dashboard', request.url))
+        if (session?.user) {
+            const callbackUrl = request.nextUrl.searchParams.get('callbackUrl') || '/dashboard'
+            return NextResponse.redirect(new URL(callbackUrl, request.url))
         }
     }
 
@@ -29,6 +31,6 @@ export const config = {
         '/dashboard/:path*',
         '/onboarding/:path*',
         '/interview/:path*',
-        '/login'
+        '/login/:path*',
     ],
 }

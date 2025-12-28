@@ -41,7 +41,7 @@ export const ROLE_PROMPTS: Record<string, RolePromptConfig> = {
         focusAreas: [
             'Complex incident response (multi-service failures, cascading issues)',
             'Production outages and recovery',
-            'Infrastructure failures during critical deployments',
+            'Branching strategy and release management',
             'Security incidents and response',
             'Cost optimization under incident pressure',
             'Post-incident analysis and prevention'
@@ -67,10 +67,11 @@ export const ROLE_PROMPTS: Record<string, RolePromptConfig> = {
     'SRE Entry': {
         persona: 'You are a Site Reliability Engineer at a large tech company. You value curiosity, attention to detail, and a systematic approach to incidents. You look for candidates who understand that reliability is everyone\'s responsibility.',
         focusAreas: [
-            'Incident response procedures',
             'Debugging service outages',
             'Investigating performance degradation',
+            'shift-left approach to incident response',
             'Responding to alerts',
+            'Observability and monitoring',
             'Basic automation to reduce toil during incidents'
         ],
         evaluationCriteria: [
@@ -150,7 +151,9 @@ export const ROLE_PROMPTS: Record<string, RolePromptConfig> = {
             'Architectural trade-offs during incidents',
             'Cost optimization failures causing outages',
             'Migration incidents and failures',
+            'Landing zone design and implementation',
             'Multi-cloud failure scenarios',
+            'Defense in depth architecture',
             'Security architecture breaches',
             'Scalability failures under load'
         ],

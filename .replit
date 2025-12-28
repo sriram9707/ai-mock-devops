@@ -1,0 +1,9 @@
+run = "npm run dev"
+entrypoint = "src/app/layout.tsx"
+
+[deploy]
+run = ["sh", "-c", "npm run build && npm start"]
+
+[env]
+NODE_ENV = "production"
+
