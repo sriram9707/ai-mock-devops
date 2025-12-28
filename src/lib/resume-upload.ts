@@ -3,7 +3,7 @@
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { existsSync } from 'fs'
-import { auth } from '@/auth'
+import { currentUser } from '@clerk/nextjs/server'
 
 const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads', 'resumes')
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -13,8 +13,8 @@ const ALLOWED_TYPES = ['application/pdf', 'application/msword', 'application/vnd
  * Upload and store resume file securely
  */
 export async function uploadResume(file: File): Promise<string> {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const user = await currentUser()
+  if (!user?.id) {
     throw new Error('Unauthorized')
   }
 
@@ -34,7 +34,7 @@ export async function uploadResume(file: File): Promise<string> {
 
   // Generate unique filename
   const timestamp = Date.now()
-  const userId = session.user.id
+  const userId = user.id
   const extension = file.name.split('.').pop()
   const filename = `${userId}-${timestamp}.${extension}`
   const filepath = join(UPLOAD_DIR, filename)
@@ -54,13 +54,13 @@ export async function uploadResume(file: File): Promise<string> {
  * Delete resume file
  */
 export async function deleteResume(url: string): Promise<void> {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const user = await currentUser()
+  if (!user?.id) {
     throw new Error('Unauthorized')
   }
 
   // Verify file belongs to user
-  if (!url.includes(session.user.id)) {
+  if (!url.includes(user.id)) {
     throw new Error('Unauthorized to delete this file')
   }
 

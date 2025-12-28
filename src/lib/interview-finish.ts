@@ -4,6 +4,7 @@ import { getSession } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { scoreInterview } from '@/lib/ai/scoring'
+import { logger } from '@/lib/logger'
 
 export async function finishInterview(sessionId: string) {
     const user = await getSession()
@@ -28,6 +29,7 @@ export async function finishInterview(sessionId: string) {
                 endedAt: new Date()
             }
         })
+        logger.interviewEnd(sessionId, session.userId, session.packId, 'COMPLETED_PRACTICE')
         redirect(`/interview/${sessionId}/results`)
         return
     }
@@ -119,5 +121,6 @@ export async function finishInterview(sessionId: string) {
         })
     })
 
+    logger.interviewEnd(sessionId, session.userId, session.packId, 'COMPLETED')
     redirect(`/interview/${sessionId}/results`)
 }

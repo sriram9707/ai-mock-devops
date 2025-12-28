@@ -5,10 +5,8 @@
 
 export function validateEnv() {
   const required = [
-    'NEXTAUTH_URL',
-    'NEXTAUTH_SECRET',
-    'GOOGLE_CLIENT_ID',
-    'GOOGLE_CLIENT_SECRET',
+    'NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY',
+    'CLERK_SECRET_KEY',
     'DATABASE_URL',
   ]
 
@@ -27,16 +25,13 @@ export function validateEnv() {
     )
   }
 
-  // Validate NEXTAUTH_SECRET length
-  if (process.env.NEXTAUTH_SECRET && process.env.NEXTAUTH_SECRET.length < 32) {
-    console.warn(
-      '⚠️  NEXTAUTH_SECRET should be at least 32 characters long for production'
-    )
+  // Validate Clerk keys format
+  if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith('pk_')) {
+    console.warn('⚠️  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY should start with "pk_"')
   }
-
-  // Validate URLs
-  if (process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.startsWith('http')) {
-    throw new Error('NEXTAUTH_URL must be a valid URL (http:// or https://)')
+  
+  if (process.env.CLERK_SECRET_KEY && !process.env.CLERK_SECRET_KEY.startsWith('sk_')) {
+    console.warn('⚠️  CLERK_SECRET_KEY should start with "sk_"')
   }
 }
 

@@ -1,24 +1,63 @@
-import { auth } from '@/auth'
-import { getSession } from '@/lib/auth'
+import { currentUser } from '@clerk/nextjs/server'
+import { UserButton } from '@clerk/nextjs'
 import prisma from '@/lib/prisma'
-import UserProfile from './UserProfile'
 import Link from 'next/link'
 import styles from './Header.module.css'
 
-export default async function Header() {
-  const session = await auth()
-  const user = session?.user
+const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || []
 
-  let profile = null
-  if (user?.id) {
-    profile = await prisma.userProfile.findUnique({
-      where: { userId: user.id },
-      select: { cvUrl: true },
-    })
-  }
+export default async function Header() {
+  const user = await currentUser()
 
   if (!user) {
     return null
+  }
+
+  // Sync Clerk user with our database
+  let dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    include: { profile: true },
+  })
+
+  // Create user in DB if doesn't exist (first login)
+  if (!dbUser) {
+    dbUser = await prisma.user.create({
+      data: {
+        id: user.id,
+        email: user.emailAddresses[0]?.emailAddress || '',
+        name: user.fullName || user.firstName || null,
+        image: user.imageUrl || null,
+        emailVerified: user.emailAddresses[0]?.verification?.status === 'verified' 
+          ? new Date() 
+          : null,
+      },
+      include: { profile: true },
+    })
+
+    // Create default user credit on signup
+    try {
+      await prisma.userCredit.create({
+        data: {
+          userId: user.id,
+          amount: 3,
+        },
+      })
+    } catch (error) {
+      console.error('Failed to create user credit:', error)
+    }
+  } else {
+    // Update user info from Clerk if changed
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        email: user.emailAddresses[0]?.emailAddress || dbUser.email,
+        name: user.fullName || user.firstName || dbUser.name,
+        image: user.imageUrl || dbUser.image,
+        emailVerified: user.emailAddresses[0]?.verification?.status === 'verified' 
+          ? new Date() 
+          : dbUser.emailVerified,
+      },
+    })
   }
 
   return (
@@ -29,18 +68,22 @@ export default async function Header() {
         </Link>
 
         <nav className={styles.nav}>
-          <UserProfile
-            user={{
-              id: user.id as string,
-              name: user.name || null,
-              email: user.email || '',
-              image: user.image || null,
+          {ADMIN_EMAILS.includes(dbUser.email) && (
+            <Link href="/admin" className={styles.adminLink}>
+              Admin
+            </Link>
+          )}
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: styles.clerkAvatar,
+                userButtonPopoverCard: styles.clerkPopover,
+              },
             }}
-            profile={profile}
+            afterSignOutUrl="/login"
           />
         </nav>
       </div>
     </header>
   )
 }
-

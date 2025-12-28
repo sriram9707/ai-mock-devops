@@ -2,9 +2,10 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(10, 14, 39, 0.95);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
 }
 
 .container {
@@ -23,17 +24,41 @@
 
 .logoText {
   font-size: 1.25rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 600;
+  color: var(--foreground);
 }
 
 .nav {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.adminLink {
+  color: var(--muted-foreground);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  transition: all var(--transition-base);
+}
+
+.adminLink:hover {
+  color: var(--primary);
+  background: var(--accent-light);
+}
+
+/* Clerk UserButton styling */
+.clerkAvatar {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.clerkPopover {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 @media (max-width: 768px) {

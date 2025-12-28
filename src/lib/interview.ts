@@ -3,6 +3,7 @@
 import { getSession } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import { logger } from '@/lib/logger'
 
 export async function purchaseInterview(packId: string) {
     const user = await getSession()
@@ -34,7 +35,7 @@ export async function purchaseInterview(packId: string) {
         },
     })
 
-
+    logger.userAction(user.id, 'purchase_interview', { packId: pack.id, packTitle: pack.title, amount: pack.price })
     redirect(`/interview/${session.id}/start`)
 }
 
@@ -42,20 +43,20 @@ export async function startNewAttempt(packId: string) {
     const user = await getSession()
     if (!user) throw new Error('Unauthorized')
 
-    // Find active order
+    // Find active order with attempts remaining
     const order = await prisma.order.findFirst({
         where: {
             userId: user.id,
             packId: packId,
             status: 'PURCHASED',
-            attemptsUsed: { lt: 3 } // Hardcoded limit for now, ideally fetch from DB default
+            attemptsUsed: { lt: 2 } // 2 attempts per pack
         }
     })
 
     if (!order) {
-        // If no active order, check if they can purchase (or redirect to purchase)
-        // For now, if no order, we throw error or redirect
-        throw new Error('No active credits for this interview pack')
+        // No active order or all attempts used - redirect to purchase
+        await purchaseInterview(packId)
+        return
     }
 
     // Create New Session

@@ -8,6 +8,7 @@ import { generateSystemPrompt } from '@/lib/ai/prompts'
 import { getPreviousQuestions, saveQuestionTurn } from '@/lib/question-tracking'
 import { isQuestion } from '@/lib/question-utils'
 import { ParsedJD } from '@/lib/jd-parser'
+import { logger } from '@/lib/logger'
 
 // Instantiate OpenAI 
 const openai = new OpenAI({
@@ -29,7 +30,7 @@ export async function POST(req: Request) {
         const messageType = message?.type || body.type // Normalized type check
 
         // Log minimal info (no message content)
-        console.log("Received /api/vapi/chat event - Type:", messageType)
+        logger.debug("VAPI chat event received", { messageType })
 
         // Validate server URL is set
         if (!process.env.NEXT_PUBLIC_SERVER_URL) {
@@ -107,7 +108,8 @@ export async function POST(req: Request) {
                         parsedJD: parsedJD,
                         previousQuestions: previousQuestions,
                         packRole: session.pack.role,
-                        candidateProfile: candidateProfile
+                        candidateProfile: candidateProfile,
+                        isPractice: session.isPractice
                     })
                 }
             }
@@ -204,7 +206,8 @@ export async function POST(req: Request) {
                     parsedJD: parsedJD,
                     previousQuestions: previousQuestions,
                     packRole: session.pack.role,
-                    retrievedContext: retrieved
+                    retrievedContext: retrieved,
+                    isPractice: session.isPractice
                 })
             }
         }

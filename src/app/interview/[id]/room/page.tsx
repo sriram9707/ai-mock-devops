@@ -52,7 +52,11 @@ export default async function InterviewRoomPage({ params }: { params: Promise<{ 
 
     return (
         <main className={styles.container}>
-            <InterviewRoom sessionId={id} initialMessage={initialMessage} />
+            <InterviewRoom 
+                sessionId={id} 
+                initialMessage={initialMessage}
+                isPractice={session.isPractice}
+            />
         </main>
     )
 }

@@ -1,6 +1,6 @@
 'use server'
 
-import { auth } from '@/auth'
+import { currentUser } from '@clerk/nextjs/server'
 import { createHash } from 'crypto'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -135,8 +135,8 @@ async function uploadToVercelBlob(file: File, buffer: Buffer, userId: string): P
  * Supports Cloudflare R2 and Vercel Blob
  */
 export async function uploadResumeCloud(file: File): Promise<string> {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const user = await currentUser()
+  if (!user?.id) {
     throw new Error('Unauthorized')
   }
 
@@ -173,9 +173,9 @@ export async function uploadResumeCloud(file: File): Promise<string> {
   try {
     // Try R2 first, then Vercel Blob, then fallback to error
     if (process.env.R2_ACCOUNT_ID) {
-      return await uploadToR2(file, buffer, session.user.id)
+      return await uploadToR2(file, buffer, user.id)
     } else if (process.env.BLOB_READ_WRITE_TOKEN) {
-      return await uploadToVercelBlob(file, buffer, session.user.id)
+      return await uploadToVercelBlob(file, buffer, user.id)
     } else {
       throw new Error(
         'No cloud storage configured. Please set R2_ACCOUNT_ID or BLOB_READ_WRITE_TOKEN in Replit Secrets.'
@@ -195,13 +195,13 @@ export async function uploadResumeCloud(file: File): Promise<string> {
  * Delete resume from cloud storage
  */
 export async function deleteResumeCloud(url: string): Promise<void> {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const user = await currentUser()
+  if (!user?.id) {
     throw new Error('Unauthorized')
   }
 
   // Verify file belongs to user (check URL contains user ID)
-  if (!url.includes(session.user.id)) {
+  if (!url.includes(user.id)) {
     throw new Error('Unauthorized to delete this file')
   }
 

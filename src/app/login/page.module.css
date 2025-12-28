@@ -3,22 +3,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+    background: var(--background);
     padding: 2rem 1rem;
-    position: relative;
-}
-
-.container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
-    pointer-events: none;
 }
 
 .card {
@@ -39,10 +25,7 @@
     font-weight: 700;
     text-align: center;
     margin-bottom: 0.75rem;
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--foreground);
 }
 
 .subtitle {
@@ -97,12 +80,12 @@
 }
 
 .googleButton {
-    background: white;
-    color: #1a202c;
+    background: var(--card);
+    color: var(--foreground);
     padding: 0.875rem 1.5rem;
     border-radius: var(--radius);
     font-weight: 600;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border);
     cursor: pointer;
     transition: all var(--transition-base);
     font-size: 1rem;
@@ -111,13 +94,13 @@
     justify-content: center;
     gap: 0.75rem;
     width: 100%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--card-shadow);
 }
 
 .googleButton:hover {
-    background: #f7fafc;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
+    background: var(--card-hover);
+    border-color: var(--primary);
+    box-shadow: var(--card-shadow-lg);
 }
 
 .googleButton:disabled {
@@ -152,7 +135,7 @@
 }
 
 .emailButton {
-    background: var(--accent-gradient);
+    background: var(--primary);
     color: var(--primary-foreground);
     padding: 0.875rem 1.5rem;
     border-radius: var(--radius);
@@ -161,7 +144,7 @@
     cursor: pointer;
     transition: all var(--transition-base);
     font-size: 1rem;
-    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
+    box-shadow: var(--card-shadow);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -170,8 +153,8 @@
 }
 
 .emailButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.4);
+    background: var(--primary-hover);
+    box-shadow: var(--card-shadow-lg);
 }
 
 .emailButton:disabled {
@@ -194,4 +177,25 @@
     color: var(--muted-foreground);
     margin-top: 1.5rem;
     line-height: 1.5;
+}
+
+/* Clerk component styling */
+.clerkWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.clerkRoot {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.clerkCard {
+    width: 100%;
+    box-shadow: none;
+    border: none;
+    background: transparent;
 }

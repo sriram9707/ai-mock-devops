@@ -6,15 +6,9 @@
     overflow: hidden;
 }
 
-.mainContent {
-    flex: 1;
-    display: flex;
-    height: 100%;
-}
-
 .avatarArea {
-    flex: 2;
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+    flex: 1;
+    background: var(--background);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -22,6 +16,7 @@
     position: relative;
     color: #fff;
     overflow: hidden;
+    height: 100vh;
 }
 
 .avatarArea::before {
@@ -32,8 +27,8 @@
     right: 0;
     bottom: 0;
     background: 
-        radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 70% 70%, rgba(139, 92, 246, 0.3) 0%, transparent 50%);
+        radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(37, 99, 235, 0.1) 0%, transparent 50%);
     pointer-events: none;
 }
 
@@ -97,8 +92,65 @@
     background: var(--error);
 }
 
+/* AI Hints Toggle - Top Right */
+.hintsButtonTop {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-size: 1.5rem;
+    z-index: 10;
+    backdrop-filter: blur(8px);
+}
+
+.hintsButtonTop:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.hintsButtonTop.hintsEnabled {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    animation: pulse 2s infinite;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.hintsIndicator {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+.hintsBadge {
+    display: inline-block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.hintsHint {
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0.25rem 0 0 0;
+}
+
 .startButton {
-    background: var(--accent-gradient);
+    background: var(--primary);
     color: white;
     border: none;
     padding: 1rem 2rem;
@@ -107,7 +159,7 @@
     font-size: 1rem;
     cursor: pointer;
     transition: all var(--transition-base);
-    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.4);
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -116,8 +168,8 @@
 }
 
 .startButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.5);
+    background: var(--primary-hover);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .startButton:active {
@@ -148,41 +200,93 @@
     }
 }
 
-.chatArea {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    border-left: 1px solid var(--border);
-    background: var(--card);
-    max-width: 480px;
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.05);
+/* Progress wrapper - positioned at top */
+.progressWrapper {
+    position: absolute;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    width: 90%;
+    max-width: 600px;
 }
 
-.messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 2rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    background: var(--background);
+/* Welcome popup - shown before interview starts, auto-closes after 3s */
+.welcomePopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 500px;
+    animation: popupFadeIn 0.3s ease-out, popupFadeOut 0.3s ease-in 2.7s forwards;
 }
 
-.messages::-webkit-scrollbar {
-    width: 6px;
+.welcomeBubble {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    padding: 1.75rem 2rem;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    position: relative;
 }
 
-.messages::-webkit-scrollbar-track {
+.closeButton {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
     background: transparent;
+    border: none;
+    color: #6b7280;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius);
+    transition: all var(--transition-base);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.messages::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: var(--radius-full);
+.closeButton:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #1a1a1a;
 }
 
-.messages::-webkit-scrollbar-thumb:hover {
-    background: var(--muted-foreground);
+.welcomeText {
+    margin: 0;
+    color: #1a1a1a;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    text-align: left;
+    padding-right: 1rem;
+}
+
+@keyframes popupFadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes popupFadeOut {
+    from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
 }
 
 .message {
@@ -224,14 +328,24 @@
 }
 
 .voiceOnlyIndicator {
+    position: absolute;
+    bottom: 8rem;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 1rem;
-    padding: 3rem 2rem;
+    padding: 2rem;
     text-align: center;
     color: var(--muted-foreground);
+    z-index: 5;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-width: 300px;
 }
 
 .voiceIcon {
@@ -359,10 +473,27 @@
         min-height: 300px;
     }
 
-    .chatArea {
-        flex: 1;
+    .welcomePopup {
+        width: 95%;
         max-width: none;
-        border-left: none;
-        border-top: 1px solid var(--border);
+    }
+
+    .welcomeBubble {
+        padding: 1.5rem 1.75rem;
+    }
+
+    .welcomeText {
+        font-size: 0.875rem;
+        padding-right: 0.5rem;
+    }
+
+    .voiceOnlyIndicator {
+        width: 95%;
+        max-width: none;
+    }
+
+    .progressWrapper {
+        width: 95%;
+        max-width: none;
     }
 }

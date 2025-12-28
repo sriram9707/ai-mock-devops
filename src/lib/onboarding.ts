@@ -1,15 +1,16 @@
 'use server'
 
-import { auth } from '@/auth'
+import { currentUser } from '@clerk/nextjs/server'
 import prisma from '@/lib/prisma'
 // Use cloud storage for Replit (ephemeral filesystem)
 // For local development, use: import { uploadResume } from '@/lib/resume-upload-secure'
 import { uploadResumeCloud } from '@/lib/resume-upload-cloud'
 import { redirect } from 'next/navigation'
+import { logger } from '@/lib/logger'
 
 export async function saveOnboarding(formData: FormData) {
-    const session = await auth()
-    if (!session?.user?.id) {
+    const user = await currentUser()
+    if (!user?.id) {
         throw new Error('Unauthorized')
     }
 
@@ -39,14 +40,14 @@ export async function saveOnboarding(formData: FormData) {
 
     // Get existing profile to preserve cvUrl if not uploading new one
     const existingProfile = await prisma.userProfile.findUnique({
-        where: { userId: session.user.id },
+        where: { userId: user.id },
         select: { cvUrl: true },
     })
 
     await prisma.userProfile.upsert({
-        where: { userId: session.user.id },
+        where: { userId: user.id },
         create: {
-            userId: session.user.id,
+            userId: user.id,
             roles: JSON.stringify(roles),
             level: level || 'Entry',
             skills: JSON.stringify(skills),
@@ -60,5 +61,6 @@ export async function saveOnboarding(formData: FormData) {
         }
     })
 
+    logger.userAction(user.id, 'onboarding_completed', { level, rolesCount: roles.length, hasResume: !!cvUrl })
     redirect('/dashboard')
 }

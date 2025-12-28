@@ -11,15 +11,39 @@ export default async function Dashboard() {
         redirect('/onboarding')
     }
 
-    const packs = await prisma.interviewPack.findMany({
+    // MVP 0.1: Only show DevOps Entry, Senior, and SRE packs
+    // Others will be shown as "Coming Soon"
+    const allPacks = await prisma.interviewPack.findMany({
         orderBy: { title: 'asc' }
     })
+    
+    // Active packs (DevOps Entry, Senior, SRE)
+    const activePacks = allPacks.filter(pack => {
+        const role = pack.role.toLowerCase()
+        const level = pack.level.toLowerCase()
+        return (
+            (role.includes('devops') && (level.includes('entry') || level.includes('senior'))) ||
+            role.includes('sre')
+        )
+    })
+    
+    // Coming soon packs (all others)
+    const comingSoonPacks = allPacks.filter(pack => {
+        const role = pack.role.toLowerCase()
+        const level = pack.level.toLowerCase()
+        return !(
+            (role.includes('devops') && (level.includes('entry') || level.includes('senior'))) ||
+            role.includes('sre')
+        )
+    })
+    
+    const packs = [...activePacks, ...comingSoonPacks]
 
     const orders = await prisma.order.findMany({
         where: { userId: user.id, status: 'PURCHASED' }
     })
 
-    // Helper to find active order for a pack
+    // Helper to find active order for a pack (with attempts remaining)
     const getOrder = (packId: string) => orders.find(o => o.packId === packId && o.attemptsUsed < o.attemptsTotal)
 
     // Server Actions need to be imported or passed via form
@@ -48,10 +72,6 @@ export default async function Dashboard() {
                         <BarChart3 size={18} />
                         Analytics
                     </Link>
-                    <Link href="/leaderboard" className={styles.navButton}>
-                        <Trophy size={18} />
-                        Leaderboard
-                    </Link>
                 </div>
             </header>
 
@@ -59,16 +79,28 @@ export default async function Dashboard() {
             <section className={styles.grid}>
                 {packs.map((pack, i) => {
                     const order = getOrder(pack.id)
-                    const attemptsLeft = order ? order.attemptsTotal - order.attemptsUsed : 0
+                    // Cap attempts at 2 (even if old orders have more)
+                    const attemptsLeft = order ? Math.min(2, order.attemptsTotal - order.attemptsUsed) : 0
+                    
+                    // Check if pack is coming soon
+                    const role = pack.role.toLowerCase()
+                    const level = pack.level.toLowerCase()
+                    const isComingSoon = !(
+                        (role.includes('devops') && (level.includes('entry') || level.includes('senior'))) ||
+                        role.includes('sre')
+                    )
 
                     return (
                         <div
                             key={pack.id}
-                            className={`${styles.card} equity-card`}
+                            className={`${styles.card} equity-card ${isComingSoon ? styles.comingSoon : ''}`}
                         >
                             <div className={styles.cardHeader}>
                                 <span className={styles.index}>0{i + 1}</span>
                                 <span className={styles.roleTag}>{pack.role}</span>
+                                {isComingSoon && (
+                                    <span className={styles.comingSoonBadge}>Coming Soon</span>
+                                )}
                             </div>
 
                             <div className={styles.cardBody}>
@@ -76,7 +108,7 @@ export default async function Dashboard() {
                                 <p className={styles.meta}>
                                     {pack.durationMinutes} MINS — {pack.level.toUpperCase()}
                                 </p>
-                                {order && (
+                                {!isComingSoon && order && (
                                     <div className={styles.attemptsBadge}>
                                         {attemptsLeft} Attempts Remaining
                                     </div>
@@ -84,7 +116,15 @@ export default async function Dashboard() {
                             </div>
 
                             <div className={styles.cardFooter}>
-                                {order ? (
+                                {isComingSoon ? (
+                                    <button 
+                                        type="button" 
+                                        className={`${styles.actionButton} ${styles.disabled}`}
+                                        disabled
+                                    >
+                                        Coming Soon
+                                    </button>
+                                ) : order ? (
                                     <form action={async () => {
                                         'use server'
                                         await startNewAttempt(pack.id)

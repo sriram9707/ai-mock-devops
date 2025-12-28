@@ -14,10 +14,19 @@ interface Message {
     content: string
 }
 
-export default function InterviewRoom({ sessionId, initialMessage }: { sessionId: string, initialMessage: string }) {
+export default function InterviewRoom({ 
+    sessionId, 
+    initialMessage,
+    isPractice = false 
+}: { 
+    sessionId: string
+    initialMessage: string
+    isPractice?: boolean
+}) {
     const { isConnected, isSpeaking, transcript, callEndReason, startInterview, stopInterview, toggleMute } = useVapi()
     const [hasStarted, setHasStarted] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [hintsEnabled, setHintsEnabled] = useState(false) // AI hints toggle (only in practice mode)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
 
@@ -94,15 +103,14 @@ export default function InterviewRoom({ sessionId, initialMessage }: { sessionId
 
     return (
         <div className={styles.container}>
-            <div className={styles.mainContent}>
-                <div className={styles.avatarArea}>
-                    <div className={`${styles.avatarPlaceholder} ${isSpeaking ? styles.speaking : ''}`}>
-                        <div className={styles.ring}></div>
-                        <Video size={48} className={styles.avatarIcon} />
-                        <span>{isConnected ? "Alex (Connected)" : "AI Interviewer"}</span>
-                    </div>
+            <div className={styles.avatarArea}>
+                <div className={`${styles.avatarPlaceholder} ${isSpeaking ? styles.speaking : ''}`}>
+                    <div className={styles.ring}></div>
+                    <Video size={48} className={styles.avatarIcon} />
+                    <span>{isConnected ? "Alex (Connected)" : "AI Interviewer"}</span>
+                </div>
 
-                    {!hasStarted || (!isConnected && hasStarted) ? (
+                {!hasStarted || (!isConnected && hasStarted) ? (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                             {!hasStarted ? (
                                 <button className={styles.startButton} onClick={handleStart}>
@@ -132,47 +140,52 @@ export default function InterviewRoom({ sessionId, initialMessage }: { sessionId
                                     {error}
                                 </div>
                             )}
-                        </div>
-                    ) : (
-                        <div className={styles.controls}>
-                            <button className={styles.controlButton} onClick={() => toggleMute(true)} title="Mute">
-                                <Mic size={20} />
-                            </button>
-                            <button className={`${styles.controlButton} ${styles.danger}`} onClick={handleEndInterview} title="End Interview">
-                                <PhoneOff size={20} />
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                <div className={styles.chatArea}>
-                    {/* Progress Indicator */}
-                    {hasStarted && isConnected && (
-                        <InterviewProgress sessionId={sessionId} />
-                    )}
-                    
-                    <div className={styles.messages}>
-                        {/* Only show initial message if interview hasn't started yet */}
-                        {!hasStarted && (
-                            <div className={`${styles.message} ${styles.assistant}`}>
-                                <div className={styles.bubble}>
-                                    {initialMessage}
-                                </div>
-                            </div>
-                        )}
-                        {/* Transcript display removed - voice-only interview */}
-                        {hasStarted && isConnected && (
-                            <div className={styles.voiceOnlyIndicator}>
-                                <div className={styles.voiceIcon}>
-                                    <Mic size={24} />
-                                </div>
-                                <p>Voice interview in progress...</p>
-                                <p className={styles.subtext}>Speak naturally. Your responses are being recorded.</p>
-                            </div>
-                        )}
-                        <div ref={messagesEndRef} />
                     </div>
-                </div>
+                ) : (
+                    <div className={styles.controls}>
+                        <button className={styles.controlButton} onClick={() => toggleMute(true)} title="Mute">
+                            <Mic size={20} />
+                        </button>
+                        <button className={`${styles.controlButton} ${styles.danger}`} onClick={handleEndInterview} title="End Interview">
+                            <PhoneOff size={20} />
+                        </button>
+                    </div>
+                )}
+
+                {/* AI Hints Toggle - Top Right (only in practice mode) */}
+                {hasStarted && isConnected && isPractice && (
+                    <button 
+                        className={`${styles.hintsButtonTop} ${hintsEnabled ? styles.hintsEnabled : ''}`}
+                        onClick={() => setHintsEnabled(!hintsEnabled)}
+                        title={hintsEnabled ? "Hints Enabled - Click to disable" : "Hints Disabled - Click to enable"}
+                    >
+                        💡
+                    </button>
+                )}
+
+                {/* Progress Indicator - shown at top when interview is active */}
+                {hasStarted && isConnected && (
+                    <div className={styles.progressWrapper}>
+                        <InterviewProgress sessionId={sessionId} />
+                    </div>
+                )}
+                
+                {/* Voice indicator - shown during active interview */}
+                {hasStarted && isConnected && (
+                    <div className={styles.voiceOnlyIndicator}>
+                        <div className={styles.voiceIcon}>
+                            <Mic size={24} />
+                        </div>
+                        <p>Voice interview in progress...</p>
+                        <p className={styles.subtext}>Speak naturally. Your responses are being recorded.</p>
+                        {isPractice && hintsEnabled && (
+                            <div className={styles.hintsIndicator}>
+                                <span className={styles.hintsBadge}>💡 AI Hints Enabled</span>
+                                <p className={styles.hintsHint}>Say "I need a hint" or "Can you help me?" to get guidance</p>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     )

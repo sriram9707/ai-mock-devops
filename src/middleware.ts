@@ -1,36 +1,27 @@
-import { auth } from '@/auth'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-export async function middleware(request: NextRequest) {
-    const session = await auth()
-    const { pathname } = request.nextUrl
+// Define public routes (routes that don't require authentication)
+const isPublicRoute = createRouteMatcher([
+  '/login(.*)',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/api/webhooks(.*)',
+])
 
-    // 1. Protected Routes: Dashboard, Onboarding, Interview
-    if (pathname.startsWith('/dashboard') || pathname.startsWith('/onboarding') || pathname.startsWith('/interview')) {
-        if (!session?.user) {
-            const loginUrl = new URL('/login', request.url)
-            loginUrl.searchParams.set('callbackUrl', pathname)
-            return NextResponse.redirect(loginUrl)
-        }
-    }
+// Admin routes require authentication (checked in page component)
 
-    // 2. Auth Routes: Login - redirect if already authenticated
-    if (pathname.startsWith('/login')) {
-        if (session?.user) {
-            const callbackUrl = request.nextUrl.searchParams.get('callbackUrl') || '/dashboard'
-            return NextResponse.redirect(new URL(callbackUrl, request.url))
-        }
-    }
-
-    return NextResponse.next()
-}
+export default clerkMiddleware(async (auth, request) => {
+  // Protect all routes except public ones
+  if (!isPublicRoute(request)) {
+    await auth.protect()
+  }
+})
 
 export const config = {
-    matcher: [
-        '/dashboard/:path*',
-        '/onboarding/:path*',
-        '/interview/:path*',
-        '/login/:path*',
-    ],
+  matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
+  ],
 }

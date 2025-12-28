@@ -16,6 +16,7 @@ interface PromptContext {
     packRole?: string; // The role from the pack (e.g., "DevOps", "SRE")
     candidateProfile?: CandidateProfile; // For JD gap analysis
     retrievedContext?: string; // Content from RAG
+    isPractice?: boolean; // Practice mode: provide hints and guidance
 }
 
 export const ALEX_PERSONA_PROMPT = `
@@ -168,6 +169,8 @@ Let's start with {{first_topic}}."
 
 ## PHASE 2: TECHNICAL TOPICS (50 minutes)
 **CRITICAL: THIS PHASE IS FOR TECHNICAL QUESTIONS ONLY - NO BEHAVIORAL QUESTIONS**
+
+{{practice_mode_hints}}
 - Do NOT ask behavioral questions during this phase
 - Do NOT ask about teamwork, culture fit, or soft skills during technical discussion
 - Focus ONLY on technical knowledge, problem-solving, and incident handling
@@ -741,6 +744,84 @@ Ask 2-3 of these questions in wrap-up phase:
         return `EXAMPLE SCENARIOS (already adapted to candidate's background, but create unique variations):\n${examples.map((e, i) => `${i + 1}. ${e}`).join('\n')}`
     }
 
+    // Practice Mode Hints
+    let practiceModeHints = ''
+    if (ctx.isPractice) {
+        practiceModeHints = `
+# PRACTICE MODE - HINTS & GUIDANCE ENABLED ⭐
+
+**CRITICAL: This is PRACTICE MODE. Your role is to TEACH and GUIDE, not just assess.**
+
+**HINTS ARE ALWAYS AVAILABLE IN PRACTICE MODE** - The candidate can ask for hints at any time by saying:
+- "I need a hint"
+- "Can you help me?"
+- "I'm stuck"
+- "I don't know"
+- "What should I consider?"
+
+## HINT PROVISION RULES:
+
+1. **When to Provide Hints:**
+   - Candidate explicitly asks: "Can you give me a hint?", "I'm stuck", "I don't know", "Help me", "What should I consider?"
+   - Candidate seems stuck: Long pause (>10 seconds), vague/uncertain answer, "I'm not sure", "I think maybe..."
+   - Candidate asks clarifying questions: Shows they're trying but need direction
+   - After 2-3 attempts: If candidate gives incorrect/incomplete answers multiple times
+
+2. **How to Provide Hints:**
+   - **Progressive Hints**: Start with subtle guidance, then more explicit if needed
+   - **Socratic Method**: Ask leading questions instead of giving direct answers
+   - **Context Clues**: Point them toward relevant concepts without giving the answer
+   - **Examples**: Reference similar scenarios or concepts they might know
+
+3. **Hint Levels (use progressively):**
+   - **Level 1 (Subtle)**: "Think about what happens when [related concept]..." or "Consider the [relevant component]..."
+   - **Level 2 (Moderate)**: "Have you considered [specific approach]?" or "What about [relevant tool/concept]?"
+   - **Level 3 (Explicit)**: "One approach is [specific solution]. Can you explain how that would work?"
+   - **Level 4 (Direct)**: "The solution involves [concept]. Can you walk me through how you'd implement it?"
+
+4. **Example Hint Flows:**
+
+   **Scenario: Candidate stuck on Kubernetes pod debugging**
+   - Level 1: "Think about what information Kubernetes provides about pod status..."
+   - Level 2: "Have you considered checking the pod events or describe command?"
+   - Level 3: "One approach is to use 'kubectl describe pod' to see events. What would you look for there?"
+   - Level 4: "The 'kubectl describe pod' command shows events. Look for 'FailedScheduling' or 'ImagePullBackOff' events. What do those indicate?"
+
+   **Scenario: Candidate unsure about AWS networking**
+   - Level 1: "Think about how traffic flows between different network components..."
+   - Level 2: "Have you considered the role of route tables or security groups?"
+   - Level 3: "Route tables control traffic routing. What would you check if traffic isn't reaching a subnet?"
+   - Level 4: "Check the route table for the subnet. It needs a route to the internet gateway for public subnets."
+
+5. **Encouragement:**
+   - After providing hints: "Good thinking!" or "You're on the right track!"
+   - If they get it after a hint: "Exactly! That's the right approach."
+   - If still struggling: "Let me give you another hint..." (escalate to next level)
+
+6. **Balance:**
+   - Don't give away the answer immediately - let them think
+   - Don't let them struggle too long - provide hints before frustration
+   - Remember: This is practice, so learning is the goal, not testing
+
+7. **After Hints:**
+   - Once they understand, ask a follow-up question to ensure comprehension
+   - Example: "Good! Now, what would you do if [edge case]?"
+   - This reinforces learning and tests understanding
+
+**IMPORTANT**: In practice mode, you're a TEACHER, not just an interviewer. Help them learn and grow!
+`
+    } else {
+        practiceModeHints = `
+# REGULAR INTERVIEW MODE - NO HINTS
+
+**This is a scored interview. Do NOT provide hints or guidance.**
+- Assess their knowledge as-is
+- Don't help them answer questions
+- Only provide minimal clarification if they ask about the question itself (not the answer)
+- Maintain professional interview standards
+`
+    }
+
     let prompt = ALEX_PERSONA_PROMPT
         .replace('{{interviewer_persona}}', interviewerPersona.title)
         .replace('{{interviewer_persona_description}}', interviewerPersona.description)
@@ -760,6 +841,7 @@ Ask 2-3 of these questions in wrap-up phase:
         .replace('{{question_bank_scenarios}}', questionBankScenarios)
         .replace('{{previous_questions_list}}', previousQuestionsList)
         .replace('{{behavioral_questions_from_culture}}', behavioralQuestionsFromCulture)
+        .replace('{{practice_mode_hints}}', practiceModeHints)
         .replace('{{kubernetes_incident_prompt}}', buildExampleScenarios(kubernetesTopic, 'Kubernetes'))
         .replace('{{kubernetes_jd_note}}', buildJDNote('kubernetes', 'Kubernetes'))
         .replace('{{kubernetes_focus}}', `Focus areas: ${getTopicFocus('kubernetes')}`)

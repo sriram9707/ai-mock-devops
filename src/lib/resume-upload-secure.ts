@@ -3,7 +3,7 @@
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { existsSync } from 'fs'
-import { auth } from '@/auth'
+import { currentUser } from '@clerk/nextjs/server'
 import { createHash } from 'crypto'
 
 // Store files OUTSIDE public folder for security
@@ -61,8 +61,8 @@ function sanitizeFilename(filename: string): string {
  * Files are stored outside public folder and served via authenticated API route
  */
 export async function uploadResumeSecure(file: File): Promise<string> {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const user = await currentUser()
+  if (!user?.id) {
     throw new Error('Unauthorized')
   }
 
@@ -103,7 +103,7 @@ export async function uploadResumeSecure(file: File): Promise<string> {
 
   // Generate secure filename
   const timestamp = Date.now()
-  const userId = session.user.id
+  const userId = user.id
   const sanitizedExt = sanitizeFilename(extension)
   const fileHash = createHash('md5').update(buffer).digest('hex').substring(0, 8)
   const filename = `${userId}-${timestamp}-${fileHash}${sanitizedExt}`
@@ -125,13 +125,13 @@ export async function uploadResumeSecure(file: File): Promise<string> {
  * Get resume file path (for authenticated API route)
  */
 export async function getResumePath(filename: string): Promise<string | null> {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const user = await currentUser()
+  if (!user?.id) {
     return null
   }
 
   // Verify file belongs to user
-  if (!filename.startsWith(session.user.id)) {
+  if (!filename.startsWith(user.id)) {
     return null
   }
 
@@ -148,13 +148,13 @@ export async function getResumePath(filename: string): Promise<string | null> {
  * Delete resume file
  */
 export async function deleteResumeSecure(filename: string): Promise<void> {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const user = await currentUser()
+  if (!user?.id) {
     throw new Error('Unauthorized')
   }
 
   // Verify file belongs to user
-  if (!filename.startsWith(session.user.id)) {
+  if (!filename.startsWith(user.id)) {
     throw new Error('Unauthorized to delete this file')
   }
 
