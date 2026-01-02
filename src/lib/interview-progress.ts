@@ -52,7 +52,7 @@ export async function getInterviewProgress(sessionId: string): Promise<Interview
 
     // Determine current phase based on time and turns
     let currentPhase: 'introduction' | 'topics' | 'wrapup' = 'introduction'
-    
+
     if (timeElapsed < 5) {
         currentPhase = 'introduction'
     } else if (timeElapsed < 50) {
@@ -74,15 +74,15 @@ export async function getInterviewProgress(sessionId: string): Promise<Interview
     let currentTopic: InterviewProgress['currentTopic'] | undefined
     const allTopicIds = allTopics.map(t => t.id)
     const topicsRemaining = allTopicIds.filter(id => !topicsCovered.includes(id))
-    
+
     if (currentPhase === 'topics') {
         // Current topic is the last one mentioned, or first uncovered
         const lastTopicId = topicsCovered[topicsCovered.length - 1]
         const currentTopicId = lastTopicId || topicsRemaining[0] || allTopicIds[0]
-        
+
         const topicIndex = allTopicIds.indexOf(currentTopicId)
         const topic = allTopics.find(t => t.id === currentTopicId)
-        
+
         if (topic) {
             currentTopic = {
                 id: topic.id,
@@ -93,11 +93,8 @@ export async function getInterviewProgress(sessionId: string): Promise<Interview
         }
     }
 
-    // Calculate estimated time remaining
-    const introductionTime = 5
-    const wrapupTime = 5
-    const topicsTime = allTopics.reduce((sum, t) => sum + t.estimatedMinutes, 0)
-    const totalEstimatedTime = introductionTime + topicsTime + wrapupTime
+    // TESTING MODE: Fixed 20-minute interview duration
+    const totalEstimatedTime = 20 // minutes (was calculated from topics)
     const estimatedTimeRemaining = Math.max(0, totalEstimatedTime - timeElapsed)
 
     // Calculate progress percentage

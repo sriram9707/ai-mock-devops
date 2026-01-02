@@ -49,6 +49,19 @@ export default function InterviewProgress({ sessionId }: InterviewProgressProps)
         return () => clearInterval(interval)
     }, [sessionId])
 
+    // TESTING MODE: Interview is 20 minutes (was 60)
+    const maxDuration = 20
+
+    // Format time display
+    const formatTime = (minutes: number): string => {
+        if (minutes < maxDuration) {
+            return `${minutes}m`
+        }
+        const hours = Math.floor(minutes / maxDuration)
+        const mins = minutes % maxDuration
+        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+    }
+
     if (isLoading || !progress) {
         return (
             <div className={styles.container}>
@@ -57,20 +70,11 @@ export default function InterviewProgress({ sessionId }: InterviewProgressProps)
         )
     }
 
-    const formatTime = (minutes: number): string => {
-        if (minutes < 60) {
-            return `${minutes}m`
-        }
-        const hours = Math.floor(minutes / 60)
-        const mins = minutes % 60
-        return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
-    }
-
     return (
         <div className={styles.container}>
             {/* Progress Bar */}
             <div className={styles.progressBar}>
-                <div 
+                <div
                     className={styles.progressFill}
                     style={{ width: `${progress.progressPercentage}%` }}
                 />

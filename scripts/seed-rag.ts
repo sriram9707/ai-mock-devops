@@ -46,14 +46,22 @@ async function seed() {
 
         const documents = awsPillars.map(pillar => new Document({
             pageContent: pillar.content,
-            metadata: { category: 'Design Principles', type: 'pillar', title: pillar.name }
+            metadata: { 
+                category: 'Design Principles', 
+                type: 'pillar', 
+                title: pillar.name,
+                source: 'AWS Well-Architected Framework',
+                url: 'https://aws.amazon.com/architecture/well-architected/'
+            }
         }))
 
         await store.addDocuments(documents)
-        console.log('✅ Successfully seeded', documents.length, 'documents!')
+        console.log('✅ Successfully seeded', documents.length, 'documents to ChromaDB!')
     } catch (error) {
         console.error('❌ Failed to seed:', error)
-        console.log('💡 Ensure ChromaDB is running on http://localhost:8000')
+        console.log('💡 Ensure ChromaDB is running:')
+        console.log('   - Local: docker run -p 8000:8000 chromadb/chroma')
+        console.log('   - Or set CHROMA_URL for remote instance')
     }
 }
 

@@ -58,13 +58,13 @@ export const INTERVIEW_TOPICS: InterviewTopic[] = [
             'Disaster recovery across regions',
             'Migration incidents during platform switch'
         ],
-        estimatedMinutes: 12,
+        estimatedMinutes: 10,
         generateIncidentPrompt: (candidateTech, jdTech, level) => {
-            const k8sPlatform = candidateTech.find(t => ['eks', 'gke', 'aks', 'openshift'].some(p => t.toLowerCase().includes(p))) || 
-                               jdTech.find(t => ['eks', 'gke', 'aks', 'openshift'].some(p => t.toLowerCase().includes(p))) || 
-                               'Kubernetes'
+            const k8sPlatform = candidateTech.find(t => ['eks', 'gke', 'aks', 'openshift'].some(p => t.toLowerCase().includes(p))) ||
+                jdTech.find(t => ['eks', 'gke', 'aks', 'openshift'].some(p => t.toLowerCase().includes(p))) ||
+                'Kubernetes'
             const platformName = k8sPlatform.toUpperCase()
-            
+
             if (level === 'entry') {
                 return `You're working with a ${platformName} cluster and notice some pods are stuck in Pending state. Users are starting to report errors. Walk me through how you would debug this issue step by step.`
             }
@@ -95,12 +95,12 @@ export const INTERVIEW_TOPICS: InterviewTopic[] = [
             'Cost explosion from pipeline inefficiencies',
             'Migration incident during tool switch'
         ],
-        estimatedMinutes: 10,
+        estimatedMinutes: 8,
         generateIncidentPrompt: (candidateTech, jdTech, level) => {
             const cicdTool = candidateTech.find(t => ['jenkins', 'gitlab', 'github actions', 'circleci', 'argo', 'flux'].some(p => t.toLowerCase().includes(p))) ||
-                            jdTech.find(t => ['jenkins', 'gitlab', 'github actions', 'circleci', 'argo', 'flux'].some(p => t.toLowerCase().includes(p))) ||
-                            'CI/CD pipeline'
-            
+                jdTech.find(t => ['jenkins', 'gitlab', 'github actions', 'circleci', 'argo', 'flux'].some(p => t.toLowerCase().includes(p))) ||
+                'CI/CD pipeline'
+
             if (level === 'entry') {
                 return `Your ${cicdTool} deployment failed halfway through. The rollback isn't working. How would you troubleshoot and resolve this?`
             }
@@ -130,12 +130,12 @@ export const INTERVIEW_TOPICS: InterviewTopic[] = [
             'Cost vs reliability incident trade-offs',
             'Disaster recovery deployment planning under pressure'
         ],
-        estimatedMinutes: 8,
+        estimatedMinutes: 6,
         generateIncidentPrompt: (candidateTech, jdTech, level) => {
             const strategy = candidateTech.find(t => ['blue-green', 'canary', 'rolling'].some(s => t.toLowerCase().includes(s))) ||
-                            jdTech.find(t => ['blue-green', 'canary', 'rolling'].some(s => t.toLowerCase().includes(s))) ||
-                            'deployment'
-            
+                jdTech.find(t => ['blue-green', 'canary', 'rolling'].some(s => t.toLowerCase().includes(s))) ||
+                'deployment'
+
             if (level === 'entry') {
                 return `A ${strategy} deployment is causing errors in production, and the rollback isn't working. Walk me through how you would resolve this.`
             }
@@ -166,15 +166,15 @@ export const INTERVIEW_TOPICS: InterviewTopic[] = [
             'Security vulnerability in Helm charts',
             'Migration incident during Helm version upgrade'
         ],
-        estimatedMinutes: 8,
+        estimatedMinutes: 6,
         generateIncidentPrompt: (candidateTech, jdTech, level) => {
-            const hasHelm = candidateTech.some(t => t.toLowerCase().includes('helm')) || 
-                           jdTech.some(t => t.toLowerCase().includes('helm'))
-            
+            const hasHelm = candidateTech.some(t => t.toLowerCase().includes('helm')) ||
+                jdTech.some(t => t.toLowerCase().includes('helm'))
+
             if (!hasHelm) {
                 return `A package manager upgrade failed and broke multiple services. The previous version won't install. How do you resolve this incident?`
             }
-            
+
             if (level === 'entry') {
                 return `A Helm chart upgrade failed and broke multiple services. The previous version won't install. Walk me through your troubleshooting steps.`
             }
@@ -205,12 +205,12 @@ export const INTERVIEW_TOPICS: InterviewTopic[] = [
             'Migration incident during IaC tool switch',
             'Policy as Code blocking critical incident response'
         ],
-        estimatedMinutes: 10,
+        estimatedMinutes: 8,
         generateIncidentPrompt: (candidateTech, jdTech, level) => {
             const iacTool = candidateTech.find(t => ['terraform', 'cloudformation', 'pulumi', 'cdk'].some(p => t.toLowerCase().includes(p))) ||
-                           jdTech.find(t => ['terraform', 'cloudformation', 'pulumi', 'cdk'].some(p => t.toLowerCase().includes(p))) ||
-                           'Infrastructure as Code'
-            
+                jdTech.find(t => ['terraform', 'cloudformation', 'pulumi', 'cdk'].some(p => t.toLowerCase().includes(p))) ||
+                'Infrastructure as Code'
+
             if (level === 'entry') {
                 return `A ${iacTool} apply failed halfway through, leaving your infrastructure in a broken state. The state file shows inconsistencies. How would you troubleshoot and fix this?`
             }
@@ -245,7 +245,7 @@ export const INTERVIEW_TOPICS: InterviewTopic[] = [
             'Stakeholder management during critical incidents',
             'Disaster recovery failure scenarios'
         ],
-        estimatedMinutes: 12,
+        estimatedMinutes: 12, // Keeping Cloud as 12 since it's broad
         generateIncidentPrompt: (candidateTech, jdTech, level) => {
             // Comprehensive cloud services list for detection
             const awsServices = [
@@ -270,7 +270,7 @@ export const INTERVIEW_TOPICS: InterviewTopic[] = [
                 // Containers
                 'ecr', 'ecs', 'eks'
             ]
-            
+
             const gcpServices = [
                 // Compute
                 'compute engine', 'gce', 'gke', 'cloud run', 'cloud functions', 'app engine', 'cloud batch',
@@ -291,7 +291,7 @@ export const INTERVIEW_TOPICS: InterviewTopic[] = [
                 // Developer Tools
                 'cloud build', 'cloud source repositories', 'artifact registry', 'cloud code'
             ]
-            
+
             const azureServices = [
                 // Compute
                 'virtual machines', 'vm', 'aks', 'container instances', 'app service', 'azure functions', 'batch', 'service fabric',
@@ -312,41 +312,41 @@ export const INTERVIEW_TOPICS: InterviewTopic[] = [
                 // Developer Tools
                 'devops', 'pipelines', 'repositories', 'artifacts', 'container registry'
             ]
-            
+
             // Detect cloud provider
             const cloudProvider = candidateTech.find(t => ['aws', 'azure', 'gcp', 'gce', 'google cloud'].some(p => t.toLowerCase().includes(p))) ||
-                                 jdTech.find(t => ['aws', 'azure', 'gcp', 'gce', 'google cloud'].some(p => t.toLowerCase().includes(p))) ||
-                                 'cloud'
-            
+                jdTech.find(t => ['aws', 'azure', 'gcp', 'gce', 'google cloud'].some(p => t.toLowerCase().includes(p))) ||
+                'cloud'
+
             const providerName = cloudProvider.toUpperCase()
-            
+
             // Detect specific services based on provider
             let services: string[] = []
             if (cloudProvider.toLowerCase().includes('aws')) {
-                services = candidateTech.concat(jdTech).filter(t => 
+                services = candidateTech.concat(jdTech).filter(t =>
                     awsServices.some(s => t.toLowerCase().includes(s))
                 )
             } else if (cloudProvider.toLowerCase().includes('gcp') || cloudProvider.toLowerCase().includes('google')) {
-                services = candidateTech.concat(jdTech).filter(t => 
+                services = candidateTech.concat(jdTech).filter(t =>
                     gcpServices.some(s => t.toLowerCase().includes(s))
                 )
             } else if (cloudProvider.toLowerCase().includes('azure')) {
-                services = candidateTech.concat(jdTech).filter(t => 
+                services = candidateTech.concat(jdTech).filter(t =>
                     azureServices.some(s => t.toLowerCase().includes(s))
                 )
             } else {
                 // Generic - check all
-                services = candidateTech.concat(jdTech).filter(t => 
+                services = candidateTech.concat(jdTech).filter(t =>
                     [...awsServices, ...gcpServices, ...azureServices].some(s => t.toLowerCase().includes(s))
                 )
             }
-            
+
             // Get top 2-3 services mentioned
             const topServices = [...new Set(services)].slice(0, 3)
-            const serviceContext = topServices.length > 0 
+            const serviceContext = topServices.length > 0
                 ? ` (affecting ${topServices.join(', ')})`
                 : ''
-            
+
             if (level === 'entry') {
                 return `A critical ${providerName} service${serviceContext} is experiencing an outage, and your application is failing. How would you handle this incident?`
             }

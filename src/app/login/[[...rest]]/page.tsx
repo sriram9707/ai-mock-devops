@@ -1,18 +1,18 @@
 'use client'
 
-import { SignUp } from '@clerk/nextjs'
+import { SignIn } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
-import styles from '../login/page.module.css'
+import styles from '../../login/page.module.css'
 
-export default function SignUpPage() {
+export default function LoginPage() {
   const { isSignedIn } = useUser()
   const router = useRouter()
 
   useEffect(() => {
     if (isSignedIn) {
-      router.push('/onboarding')
+      router.push('/dashboard')
     }
   }, [isSignedIn, router])
 
@@ -20,13 +20,13 @@ export default function SignUpPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.header}>
-          <h1 className={styles.title}>Join AI Mock Interview</h1>
+          <h1 className={styles.title}>Welcome to AI Mock Interview</h1>
           <p className={styles.subtitle}>
-            Create your account to start practicing with AI-powered interviews
+            Sign in to start practicing with AI-powered interviews
           </p>
         </div>
         <div className={styles.clerkWrapper}>
-          <SignUp
+          <SignIn
             appearance={{
               elements: {
                 rootBox: styles.clerkRoot,
@@ -34,10 +34,10 @@ export default function SignUpPage() {
               },
             }}
             routing="path"
-            path="/sign-up"
-            signInUrl="/login"
-            afterSignUpUrl="/onboarding"
+            path="/login"
+            signUpUrl="/sign-up"
             afterSignInUrl="/dashboard"
+            afterSignUpUrl="/onboarding"
           />
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { getSession } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import { logger } from '@/lib/logger'
+import { logger } from './logger'
 
 export async function purchaseInterview(packId: string) {
     const user = await getSession()
@@ -36,7 +36,7 @@ export async function purchaseInterview(packId: string) {
     })
 
     logger.userAction(user.id, 'purchase_interview', { packId: pack.id, packTitle: pack.title, amount: pack.price })
-    redirect(`/interview/${session.id}/start`)
+    redirect(`/interview/${session.id}/purchase`)
 }
 
 export async function startNewAttempt(packId: string) {

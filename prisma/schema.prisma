@@ -123,6 +123,10 @@ model InterviewSession {
   jdParsed    String?  // Optional JSON: { role, tools[], ... }
   isPractice  Boolean  @default(false) // Practice mode: no scoring, can restart
   
+  // Stateful AI State (for LLM-driven interview flow)
+  systemPrompt String? // Cached system prompt (generated once per session)
+  interviewState String? // JSON: Current interview state from LLM analysis
+  
   status      String   // "PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"
   startedAt   DateTime?
   endedAt     DateTime?

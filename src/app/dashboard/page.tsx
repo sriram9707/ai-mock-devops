@@ -16,7 +16,7 @@ export default async function Dashboard() {
     const allPacks = await prisma.interviewPack.findMany({
         orderBy: { title: 'asc' }
     })
-    
+
     // Active packs (DevOps Entry, Senior, SRE)
     const activePacks = allPacks.filter(pack => {
         const role = pack.role.toLowerCase()
@@ -26,7 +26,7 @@ export default async function Dashboard() {
             role.includes('sre')
         )
     })
-    
+
     // Coming soon packs (all others)
     const comingSoonPacks = allPacks.filter(pack => {
         const role = pack.role.toLowerCase()
@@ -36,7 +36,7 @@ export default async function Dashboard() {
             role.includes('sre')
         )
     })
-    
+
     const packs = [...activePacks, ...comingSoonPacks]
 
     const orders = await prisma.order.findMany({
@@ -68,9 +68,9 @@ export default async function Dashboard() {
                     Get instant feedback on your architecture, communication, and code.
                 </p>
                 <div className={styles.headerActions}>
-                    <Link href="/analytics" className={styles.navButton}>
+                    <Link href="/feedback-summary" className={styles.navButton}>
                         <BarChart3 size={18} />
-                        Analytics
+                        Feedback Summary
                     </Link>
                 </div>
             </header>
@@ -81,7 +81,7 @@ export default async function Dashboard() {
                     const order = getOrder(pack.id)
                     // Cap attempts at 2 (even if old orders have more)
                     const attemptsLeft = order ? Math.min(2, order.attemptsTotal - order.attemptsUsed) : 0
-                    
+
                     // Check if pack is coming soon
                     const role = pack.role.toLowerCase()
                     const level = pack.level.toLowerCase()
@@ -117,8 +117,8 @@ export default async function Dashboard() {
 
                             <div className={styles.cardFooter}>
                                 {isComingSoon ? (
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         className={`${styles.actionButton} ${styles.disabled}`}
                                         disabled
                                     >

@@ -53,7 +53,8 @@ export async function POST(req: Request) {
                 model: "nova-2",
                 language: "en"
             },
-            maxDurationSeconds: 3600, // 1 hour - allow full interview duration
+            maxDurationSeconds: 1200, // 20 minutes - TESTING MODE (change back to 3600 for production)
+            endCallFunctionEnabled: true, // Auto-end when Alex says goodbye
             metadata: {
                 sessionId: sessionId
             },

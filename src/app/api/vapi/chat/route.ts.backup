@@ -9,7 +9,6 @@ import { getPreviousQuestions, saveQuestionTurn } from '@/lib/question-tracking'
 import { isQuestion } from '@/lib/question-utils'
 import { ParsedJD } from '@/lib/jd-parser'
 import { logger } from '@/lib/logger'
-import { analyzeInterviewState, type InterviewState } from '@/lib/ai/llm-state-manager'
 
 // Instantiate OpenAI 
 const openai = new OpenAI({
@@ -17,22 +16,6 @@ const openai = new OpenAI({
 })
 
 // export const runtime = 'edge' // Removed to allow Prisma Client + SQLite usage
-
-// PERFORMANCE TUNING FLAGS - OPTIMIZED FOR SPEED + INTELLIGENCE
-const ENABLE_ASYNC_STATE_ANALYSIS = true // Run in background, no latency
-const ENABLE_CACHED_RAG = true // Use preloaded scenarios
-const MAX_RAG_TURNS = 20 // RAG throughout interview (20 mins ~= 10-12 exchanges)
-
-// Helper: Smart model selection
-function selectModel(turnCount: number): string {
-    // TEMP FIX: Always use gpt-4o-mini to avoid rate limits
-    // gpt-4o-mini has 10x higher limits (200k tokens/min vs 30k)
-    return 'gpt-4o-mini'
-
-    // Original smart selection (disabled due to rate limits):
-    // if (turnCount < 4 || turnCount % 10 === 0) return 'gpt-4o'
-    // return 'gpt-4o-mini'
-}
 
 
 export async function POST(req: Request) {
@@ -117,24 +100,6 @@ export async function POST(req: Request) {
                         }
                     }
 
-
-                    // MEMORY LAYER: Category-aware scenario retrieval
-                    let categoryScenarios: { category: string, scenarios: string[] }[] = []
-                    try {
-                        const { retrieveCategoryScenarios } = await import('@/lib/retrieval-service')
-                        console.log('📚 Loading category-based scenario bank...')
-                        categoryScenarios = await retrieveCategoryScenarios(
-                            session.pack.role,
-                            session.pack.level,
-                            [] // Will auto-detect from role
-                        )
-                        if (categoryScenarios.length > 0) {
-                            console.log(`✅ Loaded ${categoryScenarios.length} categories with ${categoryScenarios.reduce((sum, c) => sum + c.scenarios.length, 0)} scenarios`)
-                        }
-                    } catch (err) {
-                        console.error('❌ Failed to load category scenarios:', err)
-                    }
-
                     systemPrompt = generateSystemPrompt({
                         userSkills: session.user.profile.skills,
                         targetRole: session.pack.level,
@@ -146,29 +111,6 @@ export async function POST(req: Request) {
                         candidateProfile: candidateProfile,
                         isPractice: session.isPractice
                     })
-
-                    // Inject category-based scenario memory
-                    if (categoryScenarios.length > 0) {
-                        let scenarioPrompt = `\n\n# STRUCTURED SCENARIO BANK (ORGANIZED BY CATEGORY)\n\n`
-                        scenarioPrompt += `You have ${categoryScenarios.length} technical categories to cover. Spend 5-7 minutes per category with 2-3 scenarios each.\n\n`
-
-                        categoryScenarios.forEach((cat, idx) => {
-                            scenarioPrompt += `## Category ${idx + 1}: ${cat.category}\n\n`
-                            cat.scenarios.forEach((scenario, sIdx) => {
-                                scenarioPrompt += `**Scenario ${idx + 1}.${sIdx + 1}**: ${scenario}\n\n`
-                            })
-                            scenarioPrompt += `---\n\n`
-                        })
-
-                        scenarioPrompt += `**INTERVIEW STRUCTURE:**\n`
-                        scenarioPrompt += `- Pick ONE category to start (based on what candidate mentioned)\n`
-                        scenarioPrompt += `- Ask 2-3 scenarios from that category (5-7 minutes)\n`
-                        scenarioPrompt += `- Then move to NEXT category\n`
-                        scenarioPrompt += `- ADAPT scenarios to candidate's specific context\n\n`
-                        scenarioPrompt += `**CRITICAL**: These are TEMPLATES to adapt, not verbatim questions. Customize to what candidate mentioned.`
-
-                        systemPrompt += scenarioPrompt
-                    }
                 }
             }
 
@@ -238,22 +180,21 @@ export async function POST(req: Request) {
                 }
 
 
-                // OPTIMIZED: Smart Cached RAG - Only first 6 turns
+                // RAG: Retrieve context based on the last user message
                 const lastUserMsg = messages[messages.length - 1]
                 let retrieved = ''
-                const turnCount = (await prisma.interviewTurn.count({ where: { sessionId } })) / 2 // Divide by 2 for exchange count
 
-                if (ENABLE_CACHED_RAG && lastUserMsg && lastUserMsg.role !== 'system' && turnCount < MAX_RAG_TURNS) {
+                if (lastUserMsg && lastUserMsg.role !== 'system') {
+                    // Only retrieve if it's a substantive user turn
                     try {
+                        // Dynamically import to avoid edge runtime issues if any
                         const { retrieveContext } = await import('@/lib/retrieval-service')
-                        console.log(`🔍 RAG enabled for turn ${Math.floor(turnCount)}/${MAX_RAG_TURNS}`)
+                        console.log(`🔍 RAG: Retrieving context for query: "${lastUserMsg.content.substring(0, 50)}..."`)
                         retrieved = await retrieveContext(lastUserMsg.content, session.pack.level)
-                        if (retrieved) console.log('✅ RAG context retrieved')
+                        if (retrieved) console.log('✅ RAG: Context retrieved')
                     } catch (err) {
                         console.error('❌ RAG Retrieval Failed:', err)
                     }
-                } else if (turnCount >= MAX_RAG_TURNS) {
-                    console.log(`⚡ RAG disabled after turn ${MAX_RAG_TURNS} for performance`)
                 }
 
                 // Generate Dynamic Prompt ("The Brain")
@@ -268,34 +209,6 @@ export async function POST(req: Request) {
                     retrievedContext: retrieved,
                     isPractice: session.isPractice
                 })
-
-                // INTELLIGENCE LAYER: Analyze conversation state
-                if (ENABLE_ASYNC_STATE_ANALYSIS && messages.length > 2) {
-                    try {
-                        console.log('🧠 Analyzing interview state...')
-                        const state = await analyzeInterviewState(messages, {
-                            packLevel: session.pack.level,
-                            packRole: session.pack.role,
-                            jdText: session.jdRaw || session.pack.description
-                        })
-
-                        console.log('✅ State:', { phase: state.phase, depth: state.questionDepth, action: state.nextAction.action })
-
-                        const stateContext = `
-
-# INTERVIEW STATE
-**Phase**: ${state.phase} | **Topic**: ${state.currentTopic || 'None'} | **Depth**: ${state.questionDepth}/5
-**Covered**: ${state.topicsCovered.join(', ') || 'None'}
-**Next Action**: ${state.nextAction.action}
-
-${state.nextAction.action === 'move_to_next_topic' ? '⚠️ CRITICAL: MOVE TO NEXT TOPIC NOW!' : ''}
-${state.nextAction.action === 'wrap_up' ? '🚨 CRITICAL: WRAP UP NOW!' : ''}
-`
-                        systemPrompt += stateContext
-                    } catch (err) {
-                        console.error('❌ State analysis failed:', err)
-                    }
-                }
             }
         }
 
@@ -305,14 +218,9 @@ ${state.nextAction.action === 'wrap_up' ? '🚨 CRITICAL: WRAP UP NOW!' : ''}
             ...messages.filter((m: any) => m.role !== 'system')
         ]
 
-        // OPTIMIZED: Smart Model Selection
-        // TODO: Pass turnCount from above for better model selection
-        const turnCountForModel = 0 // Simplified for now
-        const selectedModel = selectModel(turnCountForModel)
-        console.log(`🤖 Using model: ${selectedModel}`)
-
+        // Call OpenAI with Standard Streaming
         const response = await openai.chat.completions.create({
-            model: selectedModel,
+            model: 'gpt-4o',
             messages: conversation as any,
             stream: true,
             temperature: 0.7,
@@ -324,63 +232,23 @@ ${state.nextAction.action === 'wrap_up' ? '🚨 CRITICAL: WRAP UP NOW!' : ''}
             async start(controller) {
                 const encoder = new TextEncoder()
                 let fullText = ""
-                let streamClosed = false
 
                 try {
                     for await (const chunk of response) {
-                        // Check if stream was closed early (Vapi disconnected)
-                        if (streamClosed) {
-                            console.log('⚠️ Stream closed early, stopping iteration')
-                            break
-                        }
-
                         const content = chunk.choices[0]?.delta?.content || ""
                         if (content) {
                             fullText += content
                         }
-
-                        try {
-                            // Vapi requires the full OpenAI chunk format wrapped in SSE 'data: ...'
-                            controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`))
-                        } catch (enqueueError: any) {
-                            if (enqueueError.code === 'ERR_INVALID_STATE') {
-                                console.log('⚠️ Controller closed during enqueue, stopping stream')
-                                streamClosed = true
-                                break
-                            }
-                            throw enqueueError
-                        }
+                        // Vapi requires the full OpenAI chunk format wrapped in SSE 'data: ...'
+                        controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`))
                     }
-
                     // Signal stream end as per standard
-                    if (!streamClosed) {
-                        try {
-                            controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-                        } catch (e: any) {
-                            if (e.code !== 'ERR_INVALID_STATE') {
-                                console.error('Error sending [DONE]:', e)
-                            }
-                        }
-                    }
+                    controller.enqueue(encoder.encode('data: [DONE]\n\n'))
                 } catch (err) {
                     console.error("Stream Error:", err)
-                    if (!streamClosed) {
-                        try {
-                            controller.error(err)
-                        } catch (e) {
-                            // Already closed, ignore
-                        }
-                    }
+                    controller.error(err)
                 } finally {
-                    if (!streamClosed) {
-                        try {
-                            controller.close()
-                        } catch (e: any) {
-                            if (e.code !== 'ERR_INVALID_STATE') {
-                                console.error('Error closing controller:', e)
-                            }
-                        }
-                    }
+                    controller.close()
 
                     // Log the full turn to DB after stream closes
                     if (sessionId && fullText) {

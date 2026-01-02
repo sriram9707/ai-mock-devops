@@ -1,6 +1,6 @@
 .container {
     height: 100vh;
-    background: var(--background);
+    background: linear-gradient(to bottom, var(--gray-50), white);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -8,17 +8,16 @@
 
 .avatarArea {
     flex: 1;
-    background: var(--background);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    color: #fff;
     overflow: hidden;
     height: 100vh;
 }
 
+/* Subtle background gradient */
 .avatarArea::before {
     content: '';
     position: absolute;
@@ -26,9 +25,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-        radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 70% 70%, rgba(37, 99, 235, 0.1) 0%, transparent 50%);
+    background:
+        radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(109, 40, 217, 0.05) 0%, transparent 50%);
     pointer-events: none;
 }
 
@@ -37,7 +36,6 @@
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
-    opacity: 0.9;
     z-index: 1;
     position: relative;
 }
@@ -45,18 +43,18 @@
 .avatarPlaceholder span {
     font-size: 1.125rem;
     font-weight: 600;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.005em;
+    color: var(--gray-900);
 }
 
 .avatarIcon {
     width: 80px;
     height: 80px;
-    color: white;
-    background: rgba(255, 255, 255, 0.1);
+    color: var(--primary);
+    background: var(--accent-light);
     padding: 1.5rem;
     border-radius: var(--radius-xl);
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(109, 40, 217, 0.2);
 }
 
 .controls {
@@ -68,9 +66,9 @@
 }
 
 .controlButton {
-    background: var(--error);
-    color: white;
-    border: none;
+    background: white;
+    color: var(--gray-700);
+    border: 1.5px solid var(--border);
     width: 56px;
     height: 56px;
     border-radius: var(--radius-full);
@@ -79,73 +77,81 @@
     justify-content: center;
     cursor: pointer;
     transition: all var(--transition-base);
-    box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.4);
+    box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
 }
 
 .controlButton:hover {
-    background: #dc2626;
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px 0 rgba(239, 68, 68, 0.5);
+    background: var(--gray-50);
+    transform: scale(1.05);
+    border-color: var(--gray-300);
 }
 
 .controlButton.danger {
     background: var(--error);
+    color: white;
+    border-color: var(--error);
 }
 
-/* AI Hints Toggle - Top Right */
+.controlButton.danger:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+/* AI Hints Toggle */
 .hintsButtonTop {
     position: absolute;
     top: 2rem;
     right: 2rem;
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    width: 56px;
-    height: 56px;
+    background: white;
+    color: var(--gray-700);
+    border: 1.5px solid var(--border);
+    width: 48px;
+    height: 48px;
     border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all var(--transition-base);
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     z-index: 10;
-    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 }
 
 .hintsButtonTop:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--gray-50);
     transform: scale(1.05);
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    border-color: var(--gray-300);
 }
 
 .hintsButtonTop.hintsEnabled {
-    background: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
     animation: pulse 2s infinite;
-    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .hintsIndicator {
     margin-top: 1rem;
     padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: white;
+    border: 1.5px solid var(--border);
     border-radius: var(--radius);
     text-align: center;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 }
 
 .hintsBadge {
     display: inline-block;
     font-size: 0.875rem;
     font-weight: 600;
-    color: white;
+    color: var(--primary);
     margin-bottom: 0.5rem;
 }
 
 .hintsHint {
     font-size: 0.8125rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--gray-600);
     margin: 0.25rem 0 0 0;
 }
 
@@ -154,12 +160,12 @@
     color: white;
     border: none;
     padding: 1rem 2rem;
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
-    transition: all var(--transition-base);
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    transition: all var(--transition-fast);
+    box-shadow: 0 4px 14px 0 rgba(109, 40, 217, 0.25);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -169,7 +175,8 @@
 
 .startButton:hover {
     background: var(--primary-hover);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 20px 0 rgba(109, 40, 217, 0.35);
+    transform: translateY(-1px);
 }
 
 .startButton:active {
@@ -184,7 +191,7 @@
     position: absolute;
     width: 100px;
     height: 100px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
+    border: 3px solid rgba(139, 92, 246, 0.3);
     border-radius: var(--radius-full);
     animation: ripple 2s infinite;
 }
@@ -194,13 +201,13 @@
         transform: scale(1);
         opacity: 1;
     }
+
     100% {
         transform: scale(1.5);
         opacity: 0;
     }
 }
 
-/* Progress wrapper - positioned at top */
 .progressWrapper {
     position: absolute;
     top: 2rem;
@@ -209,122 +216,6 @@
     z-index: 10;
     width: 90%;
     max-width: 600px;
-}
-
-/* Welcome popup - shown before interview starts, auto-closes after 3s */
-.welcomePopup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    width: 90%;
-    max-width: 500px;
-    animation: popupFadeIn 0.3s ease-out, popupFadeOut 0.3s ease-in 2.7s forwards;
-}
-
-.welcomeBubble {
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(20px);
-    padding: 1.75rem 2rem;
-    border-radius: var(--radius-xl);
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    position: relative;
-}
-
-.closeButton {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    background: transparent;
-    border: none;
-    color: #6b7280;
-    font-size: 1.5rem;
-    line-height: 1;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius);
-    transition: all var(--transition-base);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.closeButton:hover {
-    background: rgba(0, 0, 0, 0.05);
-    color: #1a1a1a;
-}
-
-.welcomeText {
-    margin: 0;
-    color: #1a1a1a;
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    text-align: left;
-    padding-right: 1rem;
-}
-
-@keyframes popupFadeIn {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-}
-
-@keyframes popupFadeOut {
-    from {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.9);
-    }
-}
-
-.message {
-    display: flex;
-    animation: slideUp 0.3s ease-out;
-}
-
-.user {
-    justify-content: flex-end;
-}
-
-.assistant {
-    justify-content: flex-start;
-}
-
-.bubble {
-    max-width: 80%;
-    padding: 1rem 1.25rem;
-    border-radius: var(--radius-lg);
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    word-wrap: break-word;
-}
-
-.user .bubble {
-    background: var(--accent-gradient);
-    color: var(--primary-foreground);
-    border-bottom-right-radius: var(--radius-sm);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
-}
-
-.assistant .bubble {
-    background: #f8f9fa;
-    color: #1a1a1a;
-    border: 1px solid #e5e7eb;
-    border-bottom-left-radius: var(--radius-sm);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    font-weight: 400;
 }
 
 .voiceOnlyIndicator {
@@ -339,13 +230,12 @@
     gap: 1rem;
     padding: 2rem;
     text-align: center;
-    color: var(--muted-foreground);
     z-index: 5;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+    background: white;
     border-radius: var(--radius-lg);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1.5px solid var(--border);
     min-width: 300px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 .voiceIcon {
@@ -363,133 +253,38 @@
 .voiceOnlyIndicator p {
     margin: 0;
     font-size: 1rem;
-    font-weight: 500;
-    color: var(--foreground);
+    font-weight: 600;
+    color: var(--gray-900);
 }
 
-.voiceOnlyIndicator .subtext {
+.voiceOnly Indicator .subtext {
     font-size: 0.875rem;
-    color: var(--muted-foreground);
+    color: var(--gray-600);
     font-weight: 400;
 }
 
-.inputArea {
-    padding: 1.5rem;
-    background: var(--card);
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.05);
-}
-
-.input {
-    flex: 1;
-    padding: 0.875rem 1.25rem;
-    border: 2px solid var(--border);
-    border-radius: var(--radius-full);
-    font-size: 0.9375rem;
-    background: var(--background);
-    color: var(--foreground);
-    transition: all var(--transition-base);
-    font-family: var(--font-body);
-}
-
-.input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-.input::placeholder {
-    color: var(--muted-foreground);
-}
-
-.iconButton,
-.sendButton {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    padding: 0.75rem;
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--transition-base);
-    width: 44px;
-    height: 44px;
-}
-
-.iconButton:hover {
-    background: var(--accent-light);
-    color: var(--primary);
-}
-
-.sendButton {
-    background: var(--accent-gradient);
-    color: white;
-    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
-}
-
-.sendButton:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.4);
-}
-
-.sendButton:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.typing {
-    display: inline-flex;
-    gap: 0.25rem;
-    align-items: center;
-}
-
-.typing::after {
-    content: '...';
-    animation: pulse 1.5s infinite;
-}
-
 @keyframes pulse {
-    0%, 100% {
-        opacity: 0.3;
+
+    0%,
+    100% {
+        opacity: 0.7;
     }
+
     50% {
         opacity: 1;
     }
 }
 
 @media (max-width: 768px) {
-    .mainContent {
-        flex-direction: column;
-    }
-
     .avatarArea {
         flex: 1;
         min-height: 300px;
     }
 
-    .welcomePopup {
-        width: 95%;
-        max-width: none;
-    }
-
-    .welcomeBubble {
-        padding: 1.5rem 1.75rem;
-    }
-
-    .welcomeText {
-        font-size: 0.875rem;
-        padding-right: 0.5rem;
-    }
-
     .voiceOnlyIndicator {
-        width: 95%;
-        max-width: none;
+        width: 90%;
+        min-width: auto;
+        padding: 1.5rem;
     }
 
     .progressWrapper {

@@ -5,7 +5,7 @@ import { submitAnswer } from '@/lib/interview-chat'
 import { finishInterview } from '@/lib/interview-finish'
 import { useRouter } from 'next/navigation'
 import styles from './InterviewRoom.module.css'
-import { Mic, Send, Video, PhoneOff } from 'lucide-react'
+import { Mic, MicOff, Send, Video, PhoneOff } from 'lucide-react'
 import { useVapi } from '@/hooks/use-vapi'
 import InterviewProgress from './InterviewProgress'
 
@@ -14,17 +14,18 @@ interface Message {
     content: string
 }
 
-export default function InterviewRoom({ 
-    sessionId, 
+export default function InterviewRoom({
+    sessionId,
     initialMessage,
-    isPractice = false 
-}: { 
+    isPractice = false
+}: {
     sessionId: string
     initialMessage: string
     isPractice?: boolean
 }) {
     const { isConnected, isSpeaking, transcript, callEndReason, startInterview, stopInterview, toggleMute } = useVapi()
     const [hasStarted, setHasStarted] = useState(false)
+    const [isMuted, setIsMuted] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [hintsEnabled, setHintsEnabled] = useState(false) // AI hints toggle (only in practice mode)
     const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -111,40 +112,48 @@ export default function InterviewRoom({
                 </div>
 
                 {!hasStarted || (!isConnected && hasStarted) ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                            {!hasStarted ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                        {!hasStarted ? (
+                            <button className={styles.startButton} onClick={handleStart}>
+                                <Mic size={20} /> Start Interview
+                            </button>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                                <div style={{ color: '#fee2e2', fontSize: '0.875rem', textAlign: 'center' }}>
+                                    Connection lost
+                                </div>
                                 <button className={styles.startButton} onClick={handleStart}>
-                                    <Mic size={20} /> Start Interview
+                                    <Mic size={20} /> Restart Interview
                                 </button>
-                            ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                                    <div style={{ color: '#fee2e2', fontSize: '0.875rem', textAlign: 'center' }}>
-                                        Connection lost
-                                    </div>
-                                    <button className={styles.startButton} onClick={handleStart}>
-                                        <Mic size={20} /> Restart Interview
-                                    </button>
-                                </div>
-                            )}
-                            {error && (
-                                <div style={{
-                                    padding: '0.75rem 1rem',
-                                    background: 'rgba(239, 68, 68, 0.1)',
-                                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                                    borderRadius: 'var(--radius)',
-                                    color: '#fee2e2',
-                                    fontSize: '0.875rem',
-                                    maxWidth: '300px',
-                                    textAlign: 'center'
-                                }}>
-                                    {error}
-                                </div>
-                            )}
+                            </div>
+                        )}
+                        {error && (
+                            <div style={{
+                                padding: '0.75rem 1rem',
+                                background: 'rgba(239, 68, 68, 0.1)',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                borderRadius: 'var(--radius)',
+                                color: '#fee2e2',
+                                fontSize: '0.875rem',
+                                maxWidth: '300px',
+                                textAlign: 'center'
+                            }}>
+                                {error}
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className={styles.controls}>
-                        <button className={styles.controlButton} onClick={() => toggleMute(true)} title="Mute">
-                            <Mic size={20} />
+                        <button
+                            className={`${styles.controlButton} ${isMuted ? styles.muted : ''}`}
+                            onClick={() => {
+                                const newMutedState = !isMuted
+                                setIsMuted(newMutedState)
+                                toggleMute(newMutedState)
+                            }}
+                            title={isMuted ? "Unmute" : "Mute"}
+                        >
+                            {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
                         </button>
                         <button className={`${styles.controlButton} ${styles.danger}`} onClick={handleEndInterview} title="End Interview">
                             <PhoneOff size={20} />
@@ -154,7 +163,7 @@ export default function InterviewRoom({
 
                 {/* AI Hints Toggle - Top Right (only in practice mode) */}
                 {hasStarted && isConnected && isPractice && (
-                    <button 
+                    <button
                         className={`${styles.hintsButtonTop} ${hintsEnabled ? styles.hintsEnabled : ''}`}
                         onClick={() => setHintsEnabled(!hintsEnabled)}
                         title={hintsEnabled ? "Hints Enabled - Click to disable" : "Hints Disabled - Click to enable"}
@@ -169,7 +178,7 @@ export default function InterviewRoom({
                         <InterviewProgress sessionId={sessionId} />
                     </div>
                 )}
-                
+
                 {/* Voice indicator - shown during active interview */}
                 {hasStarted && isConnected && (
                     <div className={styles.voiceOnlyIndicator}>

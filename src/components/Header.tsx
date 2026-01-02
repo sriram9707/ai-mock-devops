@@ -7,7 +7,13 @@ import styles from './Header.module.css'
 const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || []
 
 export default async function Header() {
-  const user = await currentUser()
+  let user
+  try {
+    user = await currentUser()
+  } catch (err) {
+    console.error('Header: currentUser() failed', err)
+    return null
+  }
 
   if (!user) {
     return null
@@ -27,8 +33,8 @@ export default async function Header() {
         email: user.emailAddresses[0]?.emailAddress || '',
         name: user.fullName || user.firstName || null,
         image: user.imageUrl || null,
-        emailVerified: user.emailAddresses[0]?.verification?.status === 'verified' 
-          ? new Date() 
+        emailVerified: user.emailAddresses[0]?.verification?.status === 'verified'
+          ? new Date()
           : null,
       },
       include: { profile: true },
@@ -53,8 +59,8 @@ export default async function Header() {
         email: user.emailAddresses[0]?.emailAddress || dbUser.email,
         name: user.fullName || user.firstName || dbUser.name,
         image: user.imageUrl || dbUser.image,
-        emailVerified: user.emailAddresses[0]?.verification?.status === 'verified' 
-          ? new Date() 
+        emailVerified: user.emailAddresses[0]?.verification?.status === 'verified'
+          ? new Date()
           : dbUser.emailVerified,
       },
     })

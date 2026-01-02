@@ -9,6 +9,21 @@ const openai = new OpenAI({
 
 interface ScoringRubric {
     technicalCompetencies: Record<string, number> // Topic scores out of 10
+    // NEW: Detailed breakdown for each topic
+    topicBreakdown: {
+        topic: string
+        overallScore: number
+        subTopics: {
+            name: string
+            score: number
+            assessment: 'strong' | 'adequate' | 'weak'
+            evidence: string // What they said/did
+            feedback: string // Specific feedback for this sub-topic
+        }[]
+        keyStrengths: string[] // What they did well in this topic
+        keyWeaknesses: string[] // What they struggled with
+        resources: string[] // Specific upskilling resources for this topic
+    }[]
     softSkills: {
         behavioral: number
         thinking: number
@@ -60,6 +75,50 @@ export async function scoreInterview(sessionId: string, previousResult?: any): P
 
     if (!session || !session.pack) {
         throw new Error('Session not found')
+    }
+
+    // Check if interview has sufficient responses to score
+    const userTurns = session.turns.filter(turn => turn.role === 'user')
+
+    if (userTurns.length < 2) {
+        // Not enough user responses to score properly
+        return {
+            technicalCompetencies: {
+                "Kubernetes/OpenShift": 0,
+                "CI/CD Tools": 0,
+                "Deployment Strategy": 0,
+                "Helm Charts": 0,
+                "Terraform": 0,
+                "Cloud Provider Services": 0
+            },
+            topicBreakdown: [], // Empty for incomplete interviews
+            softSkills: {
+                behavioral: 0,
+                thinking: 0,
+                communication: 0,
+                problemSolving: 0
+            },
+            seniorDevOpsDimensions: {
+                architecturalReasoning: 0,
+                strategicTradeoffs: 0,
+                incidentManagement: 0,
+                operationalExcellence: 0
+            },
+            seniorityGap: {
+                toolMastery: 'medior',
+                automation: 'medior',
+                impact: 'medior',
+                communication: 'medior'
+            },
+            overallScore: 0,
+            strengths: [],
+            improvements: ["Interview was incomplete - insufficient responses provided"],
+            feedback: `Interview ended prematurely with only ${userTurns.length} user response(s). Please ensure your microphone is working and that you're answering the interviewer's questions. Try again with a working audio setup.`,
+            upskillingPlan: {
+                weeks: 0,
+                focus_areas: ["Complete a full interview session"]
+            }
+        }
     }
 
     // Build conversation history
@@ -160,6 +219,53 @@ For each topic, evaluate:
    - Were their cloud solutions accurate?
    - Score LOW for wrong cloud service usage
 
+# TOPIC-BY-TOPIC BREAKDOWN (REQUIRED)
+
+For EACH technical competency, you MUST provide a detailed breakdown of sub-topics:
+
+**Format for each topic:**
+{
+  "topic": "Kubernetes/OpenShift",
+  "overallScore": 7.5,
+  "subTopics": [
+    {
+      "name": "Pod Lifecycle & Debugging",
+      "score": 9,
+      "assessment": "strong",
+      "evidence": "Correctly identified 'kubectl describe pod, logs, events' troubleshooting sequence",
+      "feedback": "Excellent debugging methodology. Showed understanding of pod states."
+    },
+    {
+      "name": "Secret Management",
+      "score": 4,
+      "assessment": "weak",
+      "evidence": "Suggested storing secrets in ConfigMaps, which is insecure",
+      "feedback": "Critical error - secrets should use Kubernetes Secrets with encryption at rest, or external solutions like HashiCorp Vault. Study: kubernetes.io/docs/concepts/configuration/secret/"
+    },
+    {
+      "name": "Networking (Services/Ingress)",
+      "score": 5,
+      "assessment": "adequate",
+      "evidence": "Understood ClusterIP vs NodePort but couldn't explain Ingress routing",
+      "feedback": "Basic service networking understood. Improve: Study Ingress controllers and path-based routing. Resource: kubernetes.io/docs/concepts/services-networking/ingress/"
+    }
+  ],
+  "keyStrengths": ["Pod debugging", "Understanding pod lifecycle"],
+  "keyWeaknesses": ["Secret management security", "Advanced networking (Ingress)"],
+  "resources": [
+    "Kubernetes Secrets best practices: kubernetes.io/docs/concepts/configuration/secret/",
+    "Ingress deep dive: kubernetes.io/docs/concepts/services-networking/ingress/"
+  ]
+}
+
+**REQUIRED for ALL 6 technical competencies:**
+1. Kubernetes/OpenShift - Break down into: Pod Lifecycle, Deployments, Secrets, ConfigMaps, Networking, RBAC
+2. CI/CD Tools - Break down into: Pipeline Design, Testing Integration, Artifact Management, Security Scanning
+3. Deployment Strategy - Break down into: Blue/Green, Canary, Rolling Updates, Rollback Strategies
+4. Helm Charts - Break down into: Templating, Values Management, Chart Structure, Security
+5. Terraform - Break down into: State Management, Modules, Providers, Security Best Practices
+6. Cloud Provider Services - Break down into: Compute, Storage, Networking, Security, Cost Optimization
+
 # SENIOR DEVOPS EVALUATION DIMENSIONS (Score each out of 10)
 
 ## 1. Architectural Reasoning (The "System Thinker")
@@ -219,6 +325,32 @@ For each topic, evaluate:
 4. Problem-Solving: How did they approach problems? Did they break them down? Consider edge cases?
    - BUT: Good problem-solving process with WRONG solutions is still wrong
 
+# FEEDBACK GENERATION REQUIREMENTS
+
+**CRITICAL**: Your feedback must be EVIDENCE-BASED with SPECIFIC EXAMPLES from the interview.
+
+**Strengths** (3-5 items):
+Format: "[Competency Area]: When discussing [topic], the candidate correctly [what they did right]. This demonstrates [why it's a strength]."
+Example: "Kubernetes Debugging: When asked about crashlooping pods, they correctly identified the troubleshooting sequence: 'kubectl describe pod, then kubectl logs, then check events'. This demonstrates solid debugging methodology."
+
+**Improvements** (2-4 items):
+Format: "[Competency Area]: When asked about [topic], they stated '[quote or paraphrase]', which is incorrect. The correct approach is [correct answer]. Actionable step: [specific practice task with resource]."
+Example: "Terraform State: They said 'I'd commit terraform.tfstate to Git', which is a critical security error. State files contain secrets and should use remote backends (S3 + DynamoDB). Practice: Complete HashiCorp's 'Remote State' tutorial."
+
+**Feedback Paragraph** (2-4 sentences):
+- Summarize overall performance
+- Mention 1-2 specific strong areas with brief evidence
+- Mention 1-2 specific weak areas with brief evidence
+- If retake: MUST explicitly state "Improved", "Regressed", or "Stagnant" with comparison
+
+Example: "Strong performance in Kubernetes troubleshooting, correctly identifying pod lifecycle issues and debugging commands. However, significant gaps in Terraform best practices, particularly remote state management and IaC security. When asked about state storage, incorrectly suggested committing state to Git instead of using remote backends."
+
+**Upskilling Plan**:
+- Must provide week-by-week breakdown
+- Each week must have 3-4 specific tasks
+- Tasks must be actionable (not vague like "practice more")
+- Include specific resources (documentation links, tutorials, courses)
+
 Return ONLY valid JSON in this exact format:
 {
   "technicalCompetencies": {
@@ -229,6 +361,31 @@ Return ONLY valid JSON in this exact format:
     "Terraform": 8.5,
     "Cloud Provider Services": 8.0
   },
+  "topicBreakdown": [
+    {
+      "topic": "Kubernetes/OpenShift",
+      "overallScore": 8.0,
+      "subTopics": [
+        {
+          "name": "Pod Lifecycle & Debugging",
+          "score": 9,
+          "assessment": "strong",
+          "evidence": "Correctly identified 'kubectl describe pod, logs, events' sequence",
+          "feedback": "Excellent debugging methodology showing deep understanding of pod states and troubleshooting."
+        },
+        {
+          "name": "Secret Management",
+          "score": 4,
+          "assessment": "weak",
+          "evidence": "Suggested storing secrets in ConfigMaps",
+          "feedback": "Critical error - use Kubernetes Secrets with encryption or Vault. Study: kubernetes.io/docs/concepts/configuration/secret/"
+        }
+      ],
+      "keyStrengths": ["Pod debugging", "Understanding pod lifecycle"],
+      "keyWeaknesses": ["Secret management security"],
+      "resources": ["kubernetes.io/docs/concepts/configuration/secret/"]
+    }
+  ],
   "softSkills": {
     "behavioral": 7.5,
     "thinking": 8.0,
@@ -248,12 +405,25 @@ Return ONLY valid JSON in this exact format:
     "communication": "borderline"
   },
   "overallScore": 77.5,
-  "strengths": ["strength1", "strength2", "strength3"],
-  "improvements": ["improvement1", "improvement2"],
-  "feedback": "Overall assessment paragraph. If this is a retake, explicitly mention improvement.",
+  "strengths": [
+    "Kubernetes Debugging: When asked about crashlooping pods, correctly identified 'kubectl describe, logs, then events'. Demonstrates solid troubleshooting methodology.",
+    "CI/CD Pipeline Design: Accurately described multi-stage pipeline with proper testing gates and artifact management.",
+    "Incident Response: Mentioned stakeholder communication and blameless postmortems, showing senior-level thinking."
+  ],
+  "improvements": [
+    "Terraform State Management: Stated 'I'd commit state to Git' - critical error. Use remote backends (S3+DynamoDB). Practice: Complete terraform.io/docs/language/state/remote tutorial.",
+    "Helm Chart Security: Did not mention image scanning or RBAC. Study: Helm security best practices documentation.",
+    "Cost Optimization: Focused only on performance, missed right-sizing discussion. Read: AWS Well-Architected Cost Optimization pillar."
+  ],
+  "feedback": "Strong Kubernetes troubleshooting skills evident when solving the crashloop scenario, correctly identifying debugging sequence and pod lifecycle concepts. However, critical gaps in Terraform security - incorrectly suggested committing state files to Git instead of using remote backends. Also missed cost optimization considerations when discussing infrastructure design.",
   "upskillingPlan": {
-    "weeks": 2,
-    "focus_areas": ["area1", "area2", "area3"]
+    "weeks": 4,
+    "focus_areas": [
+      "Week 1: Terraform State & Security - Complete HashiCorp Terraform Associate certification modules on state management. Practice: Set up S3 backend with DynamoDB locking. Read: Terraform security best practices guide.",
+      "Week 2: Cost Optimization - Study AWS Well-Architected Cost Optimization pillar. Practice: Analyze current infrastructure for right-sizing opportunities. Use AWS Cost Explorer to identify waste.",
+      "Week 3: Helm Security - Review Helm security documentation. Practice: Implement image scanning in CI/CD pipeline. Add RBAC policies to Helm charts.",
+      "Week 4: Integration Practice - Build end-to-end pipeline: Terraform (remote state) + Helm (secured charts) + cost monitoring. Document trade-offs and security considerations."
+    ]
   }
 }
 
@@ -379,6 +549,7 @@ Return ONLY the JSON object, no markdown, no explanation.`
                 "Terraform": 7.0,
                 "Cloud Provider Services": 7.0
             },
+            topicBreakdown: [], // Empty fallback - LLM failed to generate
             softSkills: {
                 behavioral: 7.0,
                 thinking: 7.0,

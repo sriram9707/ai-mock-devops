@@ -48,8 +48,8 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
                         </div>
                         <h2>Practice Mode</h2>
                         <p>
-                            This was a practice session, so no scoring was performed. 
-                            Use practice mode to familiarize yourself with the interview format 
+                            This was a practice session, so no scoring was performed.
+                            Use practice mode to familiarize yourself with the interview format
                             and get comfortable with the questions.
                         </p>
                         <div className={styles.practiceActions}>
@@ -68,6 +68,22 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
 
     // Real interview: require result
     if (!result) {
+        // If status is completed but result missing, it's generating
+        if (session.status === 'COMPLETED' || session.status === 'IN_PROGRESS') {
+            return (
+                <div className={styles.container}>
+                    <div className={styles.card}>
+                        <div className={styles.loadingWrapper}>
+                            <div className={styles.spinner}></div>
+                            <h2>Generating Your Report...</h2>
+                            <p>Alex is analyzing your interview feedback.</p>
+                            <p className={styles.subtext}>This usually takes 10-20 seconds.</p>
+                            <meta httpEquiv="refresh" content="3" />
+                        </div>
+                    </div>
+                </div>
+            )
+        }
         notFound()
     }
 
@@ -76,10 +92,10 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
     const improvements = JSON.parse(result.improvements) as string[]
     const recommendations = JSON.parse(result.upskillingPlan) as { weeks: number, focus_areas: string[] }
     const competencyScoresRaw = JSON.parse(result.competencyScores) as Record<string, number | { toolMastery: string, automation: string, impact: string, communication: string }>
-    
+
     // Extract seniority gap if present
     const seniorityGap = competencyScoresRaw._seniorityGap as { toolMastery: 'medior' | 'senior' | 'borderline', automation: 'medior' | 'senior' | 'borderline', impact: 'medior' | 'senior' | 'borderline', communication: 'medior' | 'senior' | 'borderline' } | undefined
-    
+
     // Filter out metadata from competency scores
     const competencyScores = Object.fromEntries(
         Object.entries(competencyScoresRaw).filter(([key]) => key !== '_seniorityGap')
@@ -174,7 +190,7 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
                                     <span className={styles.rubricScore}>{score.toFixed(1)} / 10</span>
                                 </div>
                                 <div className={styles.rubricBar}>
-                                    <div 
+                                    <div
                                         className={styles.rubricFill}
                                         style={{ width: `${(score / 10) * 100}%` }}
                                     />
@@ -222,7 +238,7 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
 
                 {certificate && (
                     <div className={styles.shareSection}>
-                        <CertificateShare 
+                        <CertificateShare
                             certificateId={certificate.id}
                             shareToken={certificate.shareToken}
                             certificateTitle={certificate.title}
@@ -240,8 +256,8 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
                     <Link href={`/interview/${pack.id}/purchase`} className={`${styles.button} ${styles.secondary}`}>
                         Try Again
                     </Link>
-                    <Link href="/analytics" className={`${styles.button} ${styles.secondary}`}>
-                        View Analytics
+                    <Link href="/feedback-summary" className={`${styles.button} ${styles.secondary}`}>
+                        Feedback Summary
                     </Link>
                 </div>
             </div>

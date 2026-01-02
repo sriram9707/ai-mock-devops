@@ -1,0 +1,18 @@
+/Users/sriramseshadri/Desktop/Sriram/ai-mock/node_modules/openai/src/client.ts:376
+      throw new Errors.OpenAIError(
+            ^
+
+
+OpenAIError: Missing credentials. Please pass an `apiKey`, or set the `OPENAI_API_KEY` environment variable.
+    at new OpenAI (/Users/sriramseshadri/Desktop/Sriram/ai-mock/node_modules/openai/src/client.ts:376:13)
+    at OpenAI (/Users/sriramseshadri/Desktop/Sriram/ai-mock/test-concurrent-interviews.ts:9:16)
+    at Object.<anonymous> (/Users/sriramseshadri/Desktop/Sriram/ai-mock/test-concurrent-interviews.ts:238:2)
+    at Module._compile (node:internal/modules/cjs/loader:1734:14)
+    at Object.transformer (/Users/sriramseshadri/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1469:32)
+    at Function._load (node:internal/modules/cjs/loader:1286:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at cjsLoader (node:internal/modules/esm/translators:315:5)
+
+Node.js v23.11.0

@@ -21,7 +21,7 @@ export function useVapi() {
 
     useEffect(() => {
         const key = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY || 'demo-public-key'
-        
+
         // Warn if using demo key
         if (key === 'demo-public-key') {
             console.warn("⚠️ Using demo Vapi key. Set NEXT_PUBLIC_VAPI_PUBLIC_KEY in your environment variables.")
@@ -43,7 +43,7 @@ export function useVapi() {
             // Use type assertion for call-end since it may accept data parameter
             const vapiAny = vapiIndex as any
             vapiAny.on('call-end', (data: any) => {
-                const reason = data?.reason || data?.message?.errorMsg || data?.message || 
+                const reason = data?.reason || data?.message?.errorMsg || data?.message ||
                     (data?.error?.message?.errorMsg) || 'Call ended'
                 console.log('🔴 Vapi Call Ended:', reason)
                 console.log('Call end data:', JSON.stringify(data, null, 2))
@@ -85,7 +85,7 @@ export function useVapi() {
             } catch (e) {
                 // Event might not be available
             }
-            
+
             try {
                 vapiAny.on('hang', (data: any) => {
                     console.log('📡 Vapi Event [hang]:', data)
@@ -97,7 +97,7 @@ export function useVapi() {
             vapiIndex.on('error', (e: any) => {
                 // Extract nested error messages (Daily.co errors are nested)
                 let errorMessage = 'Unknown error'
-                
+
                 if (e?.error?.message?.errorMsg) {
                     // Daily.co error structure: error.error.message.errorMsg
                     errorMessage = e.error.message.errorMsg
@@ -119,7 +119,7 @@ export function useVapi() {
                 } else {
                     errorMessage = JSON.stringify(e)
                 }
-                
+
                 const errorDetails = {
                     message: errorMessage,
                     error: e,
@@ -131,19 +131,19 @@ export function useVapi() {
                     isConnected: vapiRef.current?.isConnected || false,
                     fullError: e // Include full error for debugging
                 }
-                
+
                 console.error("❌ Vapi SDK Internal Error:", errorDetails)
-                
+
                 // Check if it's a call ejection/ending error
                 const errorStr = String(errorMessage).toLowerCase()
-                if (errorStr.includes('ejection') || errorStr.includes('meeting has ended') || 
+                if (errorStr.includes('ejection') || errorStr.includes('meeting has ended') ||
                     errorStr.includes('call ended') || errorStr.includes('hang') ||
                     errorStr.includes('daily-error')) {
                     setCallEndReason(errorMessage)
                     console.warn("⚠️ Call was ended unexpectedly:", errorMessage)
                     console.warn("Full error structure:", JSON.stringify(e, null, 2))
                 }
-                
+
                 setIsConnected(false)
                 setIsListening(false)
                 setIsSpeaking(false)
@@ -179,76 +179,144 @@ export function useVapi() {
         setIsConnected(true) // Optimistic UI
 
         try {
-            console.log("📞 Requesting Server to create Vapi Assistant...")
-            console.log("Session ID:", sessionId)
-
-            // 1. Ask our server to create the assistant (using Private Key)
-            const response = await fetch('/api/vapi/start', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    sessionId,
-                    systemPrompt,
-                    firstMessage
-                })
+            // Check if we're using a dedicated agent ID
+            const dedicatedAgentId = process.env.NEXT_PUBLIC_VAPI_AGENT_ID
+            console.log('🔍 Environment check:', {
+                dedicatedAgentId,
+                hasDedicatedAgent: !!dedicatedAgentId,
+                allEnvKeys: Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_VAPI'))
             })
 
-            if (!response.ok) {
-                let errorMessage = "Failed to create assistant"
+            if (dedicatedAgentId) {
+                // Use dedicated agent directly - simpler approach
+                console.log("🎙️ Starting Vapi call with dedicated agent:", dedicatedAgentId)
+                console.log("Session ID:", sessionId)
+
                 try {
-                    const err = await response.json()
-                    errorMessage = err.error || err.message || errorMessage
-                    console.error("❌ Server failed to create assistant:", err)
-                } catch (parseError) {
-                    const errorText = await response.text()
-                    console.error("❌ Server error (non-JSON):", errorText)
-                    errorMessage = errorText || errorMessage
+                    // Use assistant overrides to pass dynamic firstMessage and systemPrompt
+                    // This allows us to customize each interview while using the same base agent
+                    const assistantOverrides = {
+                        firstMessage: firstMessage,
+                        variableValues: {
+                            sessionId: sessionId
+                        },
+                        // Override the model's system messages with our dynamic system prompt
+                        // This ensures the agent follows proper interview behavior (one question at a time, etc.)
+                        model: {
+                            messages: [
+                                {
+                                    role: 'system',
+                                    content: systemPrompt
+                                }
+                            ]
+                        }
+                    }
+
+                    console.log("📝 Using assistant overrides:", {
+                        firstMessage: firstMessage.substring(0, 50) + "...",
+                        systemPromptLength: systemPrompt.length,
+                        sessionId
+                    })
+
+                    // Start the call with the dedicated agent ID and overrides
+                    const startPromise = vapiRef.current.start(dedicatedAgentId, assistantOverrides)
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Call start timeout after 10 seconds')), 10000)
+                    )
+
+                    await Promise.race([startPromise, timeoutPromise])
+                    console.log("✅ Vapi call started successfully with dedicated agent")
+                } catch (startError: any) {
+                    console.error("❌ Failed to start Vapi call:", {
+                        error: startError,
+                        message: startError?.message,
+                        stack: startError?.stack,
+                        agentId: dedicatedAgentId,
+                        errorType: typeof startError,
+                        errorString: String(startError)
+                    })
+                    setIsConnected(false)
+
+                    // Check if it's an ejection error
+                    const errorMsg = String(startError?.message || startError || '').toLowerCase()
+                    if (errorMsg.includes('ejection') || errorMsg.includes('meeting has ended')) {
+                        setCallEndReason(startError?.message || 'Call was ejected')
+                    }
+
+                    throw startError
                 }
-                throw new Error(errorMessage)
-            }
+            } else {
+                // Fallback: Create dynamic assistant on each call
+                console.log("📞 Requesting Server to create Vapi Assistant...")
+                console.log("Session ID:", sessionId)
 
-            const assistant = await response.json()
-            console.log("✅ Assistant Created:", assistant.id)
-
-            if (!assistant.id) {
-                throw new Error("Assistant created but no ID returned")
-            }
-
-            // 2. Start the call using the validated Assistant ID
-            // This bypasses the "Transient Assistant" restriction on Public Keys
-            console.log("🎙️ Starting Vapi call with assistant:", assistant.id)
-            console.log("Vapi instance state:", {
-                hasInstance: !!vapiRef.current,
-                instanceType: typeof vapiRef.current
-            })
-            
-            try {
-                // Add a timeout to detect if the call doesn't start
-                const startPromise = vapiRef.current.start(assistant.id)
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Call start timeout after 10 seconds')), 10000)
-                )
-                
-                await Promise.race([startPromise, timeoutPromise])
-                console.log("✅ Vapi call started successfully")
-            } catch (startError: any) {
-                console.error("❌ Failed to start Vapi call:", {
-                    error: startError,
-                    message: startError?.message,
-                    stack: startError?.stack,
-                    assistantId: assistant.id,
-                    errorType: typeof startError,
-                    errorString: String(startError)
+                // 1. Ask our server to create the assistant (using Private Key)
+                const response = await fetch('/api/vapi/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId,
+                        systemPrompt,
+                        firstMessage
+                    })
                 })
-                setIsConnected(false)
-                
-                // Check if it's an ejection error
-                const errorMsg = String(startError?.message || startError || '').toLowerCase()
-                if (errorMsg.includes('ejection') || errorMsg.includes('meeting has ended')) {
-                    setCallEndReason(startError?.message || 'Call was ejected')
+
+                if (!response.ok) {
+                    let errorMessage = "Failed to create assistant"
+                    try {
+                        const err = await response.json()
+                        errorMessage = err.error || err.message || errorMessage
+                        console.error("❌ Server failed to create assistant:", err)
+                    } catch (parseError) {
+                        const errorText = await response.text()
+                        console.error("❌ Server error (non-JSON):", errorText)
+                        errorMessage = errorText || errorMessage
+                    }
+                    throw new Error(errorMessage)
                 }
-                
-                throw startError
+
+                const assistant = await response.json()
+                console.log("✅ Assistant Created:", assistant.id)
+
+                if (!assistant.id) {
+                    throw new Error("Assistant created but no ID returned")
+                }
+
+                // 2. Start the call using the validated Assistant ID
+                console.log("🎙️ Starting Vapi call with assistant:", assistant.id)
+                console.log("Vapi instance state:", {
+                    hasInstance: !!vapiRef.current,
+                    instanceType: typeof vapiRef.current
+                })
+
+                try {
+                    // Add a timeout to detect if the call doesn't start
+                    const startPromise = vapiRef.current.start(assistant.id)
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Call start timeout after 10 seconds')), 10000)
+                    )
+
+                    await Promise.race([startPromise, timeoutPromise])
+                    console.log("✅ Vapi call started successfully")
+                } catch (startError: any) {
+                    console.error("❌ Failed to start Vapi call:", {
+                        error: startError,
+                        message: startError?.message,
+                        stack: startError?.stack,
+                        assistantId: assistant.id,
+                        errorType: typeof startError,
+                        errorString: String(startError)
+                    })
+                    setIsConnected(false)
+
+                    // Check if it's an ejection error
+                    const errorMsg = String(startError?.message || startError || '').toLowerCase()
+                    if (errorMsg.includes('ejection') || errorMsg.includes('meeting has ended')) {
+                        setCallEndReason(startError?.message || 'Call was ejected')
+                    }
+
+                    throw startError
+                }
             }
 
         } catch (e: any) {
@@ -259,7 +327,7 @@ export function useVapi() {
                 sessionId
             })
             setIsConnected(false)
-            
+
             // Re-throw to allow UI to handle the error
             throw e
         }
