@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 *.md
+# allow committed reference material for the RAG knowledge base
+!data/knowledge-base/
+!data/knowledge-base/**/*.md
 
 # debug
 npm-debug.log*

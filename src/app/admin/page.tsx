@@ -3,9 +3,7 @@ import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
 import { Users, TrendingUp, BarChart3, DollarSign, Clock, Award } from 'lucide-react'
 import styles from './page.module.css'
-
-// Simple admin check - in production, use proper role-based access
-const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || []
+import { isAdminEmail } from '@/lib/admin'
 
 export default async function AdminDashboard() {
     const user = await getSession()
@@ -15,7 +13,7 @@ export default async function AdminDashboard() {
     }
 
     // Check if user is admin
-    if (!ADMIN_EMAILS.includes(user.email)) {
+    if (!isAdminEmail(user.email)) {
         redirect('/dashboard')
     }
 

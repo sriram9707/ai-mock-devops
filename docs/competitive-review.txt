@@ -1,0 +1,19 @@
+AI Mock (this repo) competitive positioning
+
+Rating vs market: B+ (roughly 7.5/10). Strong AI-first practice flow with role-specific personas and instant feedback, but lacks live mentor loops and job-matching funnels offered by top platforms.
+
+Strengths
+- Fast, self-serve practice: The landing copy promises AI personas, instant scoring, and role-targeted prompts, aligning with a quick practice loop that avoids scheduling friction common in live-interview marketplaces.
+- Reliability-focused content: The RAG knowledge base now includes SRE and DevOps incident/runbook material, which can power deeper scenario questions than generic interview bots.
+- Modern stack: Next.js with Clerk auth, LangChain-based RAG, and Prisma keep the product customizable compared to closed SaaS competitors.
+
+Gaps vs competitors
+- Human feedback: Platforms like interviewing.io and Pramp deliver real interviewer feedback and resume signals; this app currently provides only automated scoring without human benchmarks.
+- Benchmarking and placement: No leaderboard, percentile scoring, or referral/placement pipeline like Karat or Triplebyte offered, which limits tangible career outcomes.
+- Content breadth: Current marketing highlights SDE/DevOps/PM, but the knowledge base is still limited to reliability/DevOps topics; broader role libraries (frontend, data, security) would better match competitor coverage.
+- Voice and realism: Live calls start voice-only through Vapi today, but the landing flow doesn’t surface that differentiator or demonstrate how natural the conversation feels; mature competitors emphasize polished voice demos and coding task execution.
+
+Opportunities to close gaps
+- Add structured scoring benchmarks (percentiles vs peers) and optional human review add-ons to mirror interviewing.io’s signal layer.
+- Expand the knowledge base to non-DevOps roles and include coding task grading to reach parity with HackerRank/LeetCode-style drills.
+- Expose voice-based sessions and scenario branching to differentiate on realism while keeping the AI-first speed advantage.
