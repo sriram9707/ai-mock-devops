@@ -1,0 +1,14 @@
+# Do you need LangGraph for this RAG pipeline?
+
+Short answer: **no**—the current RAG workflow already runs end-to-end without LangGraph. Retrieval and ingestion rely on plain LangChain components in `scripts/ingest-data.ts` and the vector store helpers, so nothing is blocked on graph orchestration right now.
+
+## How the current pipeline works (without LangGraph)
+- **Ingestion**: `scripts/ingest-data.ts` loads every supported file under `data/knowledge-base`, splits it with `RecursiveCharacterTextSplitter`, and writes the chunks to the Chroma-backed vector store via the shared `getVectorStore` helper. There is no control flow that needs a stateful graph; the script is linear batch processing.
+- **Retrieval/runtime**: The app queries the same vector store during interviews (via LangChain primitives) to fetch relevant chunks. Requests are stateless and do not maintain multi-step agent memory that would benefit from a graph executor.
+
+## When LangGraph would be useful
+If you later add multi-turn tools or stateful flows (e.g., escalation steps, tool-calling retries, guarded evaluation before answering), LangGraph could help manage that control logic and persistence. For the existing ingestion + retrieval setup, it would add complexity without new capabilities.
+
+## What to do now
+- Keep running `npx tsx scripts/ingest-data.ts` whenever you add or edit files in `data/knowledge-base` so the embeddings stay in sync.
+- Only introduce LangGraph if you design a stateful agent that needs branching or resumable execution; otherwise, the current LangChain-only flow is sufficient.

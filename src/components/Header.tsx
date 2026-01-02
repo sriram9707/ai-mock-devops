@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs'
 import styles from './Header.module.css'
+import { isAdminEmail } from '@/lib/admin'
 
 const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || []
 

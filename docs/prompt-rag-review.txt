@@ -1,0 +1,14 @@
+# Prompt and RAG Knowledge Base Evaluation
+
+## System prompt observations
+- The interviewer prompt enforces a hard-coded 20-minute interview window and wrap-up guidance that may not match real call durations. If actual calls differ, the agent will still rush or stall to satisfy the scripted timing rules, which can create awkward pacing.
+- The context preamble frames every retrieval as "AWS architectural standards" and instructs the agent to challenge candidates against those standards. For non-AWS interviews this steers the assistant toward AWS even when the candidate or pack is focused on other technologies.
+
+## RAG knowledge base findings
+- The current seed script only ingests three AWS Well-Architected pillars. That narrow scope leaves no incident scenarios or role-specific material for DevOps/SRE interviews, so similarity searches will mostly return the same generic AWS guidance.
+- Retrieval utilities request Kubernetes, Terraform, CI/CD, and AWS incident scenarios across multiple categories. With only the AWS pillar text in the vector store, most of those queries will return empty results, so the agent falls back to large system prompts without useful retrieved context.
+
+## Recommendations
+- Parameterize or strip the 20-minute timing rules when the platform does not enforce that limit so the interviewer cadence matches the real experience.
+- Broaden the context preamble so it reflects the role or pack being interviewed (e.g., DevOps/SRE incident doctrine) instead of always focusing on AWS well-architected standards.
+- Expand the RAG seed data with realistic incident postmortems and runbooks across Kubernetes, Terraform, CI/CD, and cloud topics to align with the retrieval queries and avoid empty context blocks.
