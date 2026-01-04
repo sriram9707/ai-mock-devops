@@ -16,15 +16,15 @@ const openai = new OpenAI({
  * Structured output schema for interview state analysis
  */
 const InterviewStateSchema = z.object({
-    phase: z.enum(['introduction', 'topics', 'wrapup']),
-    currentTopic: z.string().optional(),
+    phase: z.preprocess((val) => String(val).toLowerCase(), z.enum(['introduction', 'topics', 'wrapup'])),
+    currentTopic: z.string().nullable().optional(),
     topicsCovered: z.array(z.string()).default([]),
     questionDepth: z.number().min(0).max(5),
-    candidateLevel: z.enum(['entry', 'mid', 'senior', 'architect']).optional(),
+    candidateLevel: z.preprocess((val) => String(val).toLowerCase(), z.enum(['entry', 'mid', 'senior', 'architect']).optional()),
     nextAction: z.object({
-        action: z.enum(['continue_topic', 'move_to_next_topic', 'drill_down', 'wrap_up']),
+        action: z.preprocess((val) => String(val).toLowerCase(), z.enum(['continue_topic', 'move_to_next_topic', 'drill_down', 'wrap_up'])),
         topic: z.string().optional(),
-        questionType: z.enum(['definition', 'scenario', 'deep_dive', 'behavioral']).optional(),
+        questionType: z.preprocess((val) => String(val).toLowerCase(), z.enum(['definition', 'scenario', 'deep_dive', 'behavioral']).optional()),
         ragQuery: z.string().optional(), // For targeted RAG retrieval
     }),
     candidateProfile: z.object({
@@ -54,6 +54,7 @@ export async function analyzeInterviewState(
         packRole: string
         jdText?: string
         previousState?: InterviewState
+        allowedTopics?: string[]
     }
 ): Promise<InterviewState> {
     const systemPrompt = `You are an AI system that analyzes interview conversations and determines the next best action.
@@ -69,18 +70,34 @@ Context:
 - Interview Level: ${sessionContext.packLevel}
 - Interview Role: ${sessionContext.packRole}
 ${sessionContext.jdText ? `- Job Description: ${sessionContext.jdText.substring(0, 500)}...` : ''}
+${sessionContext.allowedTopics?.length ? `- ALLOWED TOPICS: ${sessionContext.allowedTopics.join(', ')} (You MUST strictly choose from these)` : ''}
 
 Previous State:
 ${sessionContext.previousState ? JSON.stringify(sessionContext.previousState, null, 2) : 'None (first turn)'}
 
-Return a structured JSON object with:
-- phase: Current interview phase
+Return a structured JSON object. You must strictly adhere to the following values:
+
+- phase: One of ["introduction", "topics", "wrapup"]
 - currentTopic: Current technical topic being discussed
 - topicsCovered: List of topics already covered
 - questionDepth: How deep we've gone (0-5, where 0=basic, 5=expert)
-- candidateLevel: Inferred candidate level
-- nextAction: What to do next (action, topic, questionType, ragQuery)
+- candidateLevel: One of ["entry", "mid", "senior", "architect"]
+- nextAction: {
+    action: One of ["continue_topic", "move_to_next_topic", "drill_down", "wrap_up"],
+    topic: string (optional),
+    questionType: One of ["definition", "scenario", "deep_dive", "behavioral"],
+    ragQuery: string (optional)
+}
 - candidateProfile: Extracted candidate information
+
+CRITICAL RULES FOR NEXT ACTION:
+1. If the candidate answers the previous question correctly or sufficiently, MOVE ON. Set action to "move_to_next_topic" or "drill_down" into a NEW aspect.
+2. Do NOT stay on the same specific question if it was answered.
+3. Only use "continue_topic" if the candidate's answer was partial, unclear, or you are building a multi-step scenario.
+4. Avoid looping. If you've asked about X twice, force a move to Y.
+5. If ALLOWED TOPICS are provided, your 'nextAction.topic' MUST be one of them (or related to them). Do NOT default to generic topics like 'CI/CD' unless listed.
+
+6. For SENIOR/ARCHITECT candidates: NEVER ask definitions (e.g. "What is X?"). Instead, ask "What is your experience with X?" or "Describe how you architected X". Start at Depth 3+.
 
 Be dynamic and adaptive. If the candidate shows deep knowledge, increase depth. If they struggle, provide more foundational questions.`
 
@@ -137,14 +154,20 @@ export async function generateNextQuestion(
 Interview State:
 ${JSON.stringify(state, null, 2)}
 
-Conversation History (last 3 turns):
+Conversation History(last 3 turns):
 ${conversationHistory.slice(-3).map(t => `${t.role}: ${t.content}`).join('\n')}
 
-Generate a natural, conversational question that:
-1. Matches the questionType: ${state.nextAction.questionType}
-2. Is appropriate for depth level: ${state.questionDepth}
-3. Builds on the conversation naturally
-4. Is specific and actionable
+Generate a sharp, specific question that:
+    1. Matches the questionType: ${state.nextAction.questionType}
+    2. Is appropriate for depth level: ${state.questionDepth}
+    3. Builds on the conversation naturally.
+4. IMPORTANT: If the candidate just answered a similar question, DO NOT ask it again.Pivot to a related trade - off, edge case, or a completely new aspect.
+5. If action is "drill_down", challenge their specific implementation details or trade - offs.
+6. CONTEXT USAGE: Use any provided "[Official Troubleshooting Guide]" or source material as INSPIRATION. Use the concepts to ground your scenario, but feel free to be creative, conversational, and adapt the question to the flow. Do not be rigid.
+7. STYLE GUARD: For Senior/Architect roles (Depth >= 3), avoid "What is...?" questions. 
+   - Ask: "Tell me about a time you...", "How have you handled...", "Walk me through your architecture for...".
+8. TOPIC COHERENCE: Focus on one primary technical domain per question. Do not force unrelated tools together (e.g. Jenkins and Runtime 502 Errors). If asking about a tool, stick to its specific scope.
+9. CI/CD MANDATES: When the topic is CI/CD, you MUST ask about: Branching Strategies (GitFlow vs Trunk), Docker Image Versioning strategies (Semantic vs SHA), or Hotfix/Rollback workflows.
 
 Return only the question text, no additional commentary.`
 

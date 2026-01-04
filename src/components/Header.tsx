@@ -5,7 +5,7 @@ import { SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs'
 import styles from './Header.module.css'
 import { isAdminEmail } from '@/lib/admin'
 
-const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || []
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || process.env.ADMIN_EMAILS)?.split(',') || []
 
 export default function Header() {
   const { user } = useUser()
@@ -13,7 +13,7 @@ export default function Header() {
   const fallbackEmail = user?.emailAddresses?.[0]?.emailAddress
   const email = primaryEmail || fallbackEmail
 
-  const isAdmin = email ? ADMIN_EMAILS.includes(email) : false
+  const isAdmin = email ? ADMIN_EMAILS.some(adminEmail => adminEmail.trim().toLowerCase() === email.toLowerCase()) : false
 
   return (
     <header className={styles.header}>
@@ -38,7 +38,7 @@ export default function Header() {
             </Link>
             {isAdmin && (
               <Link href="/admin" className={styles.navLink}>
-                Admin
+                Admin Analytics
               </Link>
             )}
             <UserButton

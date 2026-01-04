@@ -98,7 +98,10 @@ export function useVapi() {
                 // Extract nested error messages (Daily.co errors are nested)
                 let errorMessage = 'Unknown error'
 
-                if (e?.error?.message?.errorMsg) {
+                // Detect empty error objects (often connection drop or mic denial)
+                if (Object.keys(e || {}).length === 0 && !e?.message) {
+                    errorMessage = "Empty error received from Vapi. Likely connection drop or microphone access denied."
+                } else if (e?.error?.message?.errorMsg) {
                     // Daily.co error structure: error.error.message.errorMsg
                     errorMessage = e.error.message.errorMsg
                 } else if (e?.error?.message?.message?.errorMsg) {
@@ -132,7 +135,12 @@ export function useVapi() {
                     fullError: e // Include full error for debugging
                 }
 
-                console.error("❌ Vapi SDK Internal Error:", errorDetails)
+                console.error("❌ Vapi SDK Error:", errorDetails)
+
+                // If it's the specific empty error, alert the user via console
+                if (errorMessage.includes("Empty error")) {
+                    console.warn("💡 TIP: Check microphone permissions and network connection.")
+                }
 
                 // Check if it's a call ejection/ending error
                 const errorStr = String(errorMessage).toLowerCase()

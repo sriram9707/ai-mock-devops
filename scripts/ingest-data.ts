@@ -39,13 +39,13 @@ function isSupportedFile(filename: string): boolean {
  */
 async function loadFilesFromDirectory(dirPath: string, basePath: string = dirPath): Promise<Array<{ path: string, content: string, category: string }>> {
     const files: Array<{ path: string, content: string, category: string }> = []
-    
+
     try {
         const entries = await readdir(dirPath, { withFileTypes: true })
-        
+
         for (const entry of entries) {
             const fullPath = join(dirPath, entry.name)
-            
+
             if (entry.isDirectory()) {
                 // Recursively load from subdirectories
                 const subFiles = await loadFilesFromDirectory(fullPath, basePath)
@@ -57,7 +57,7 @@ async function loadFilesFromDirectory(dirPath: string, basePath: string = dirPat
                     // e.g., data/knowledge-base/linux/kernel.md -> category: "linux"
                     const relativePath = fullPath.replace(basePath + '/', '')
                     const category = relativePath.split('/')[0] || 'general'
-                    
+
                     files.push({
                         path: fullPath,
                         content,
@@ -71,7 +71,7 @@ async function loadFilesFromDirectory(dirPath: string, basePath: string = dirPat
     } catch (error) {
         console.warn(`⚠️  Failed to read directory ${dirPath}:`, error)
     }
-    
+
     return files
 }
 
@@ -84,9 +84,9 @@ async function splitText(content: string, metadata: Record<string, any>): Promis
         chunkOverlap: CHUNK_OVERLAP,
         separators: ['\n\n', '\n', '. ', ' ', ''] // Try to split on paragraphs, then sentences, then words
     })
-    
+
     const chunks = await splitter.splitText(content)
-    
+
     return chunks.map((chunk: string, index: number) => {
         return new Document({
             pageContent: chunk,
@@ -105,32 +105,73 @@ async function splitText(content: string, metadata: Record<string, any>): Promis
  */
 function extractMetadata(filePath: string, category: string, content: string): Record<string, any> {
     const filename = filePath.split('/').pop() || 'unknown'
-    const title = filename.replace(/\.[^/.]+$/, '') // Remove extension
-    
+    let title = filename.replace(/\.[^/.]+$/, '') // Remove extension
+
     // Extract subcategory from nested paths (e.g., "cloud/aws" -> subcategory: "aws")
     const pathParts = filePath.split('/')
     const subcategory = pathParts.length > 2 ? pathParts[pathParts.length - 2] : undefined
-    
-    // Try to extract title from markdown if available
-    let extractedTitle = title
-    if (content.startsWith('# ')) {
-        const firstLine = content.split('\n')[0]
-        extractedTitle = firstLine.replace(/^#+\s*/, '').trim() || title
-    }
-    
-    // Clean up title (remove "Interviewer Reference" suffix if present)
-    extractedTitle = extractedTitle.replace(/\s*_?\s*Interviewer Reference\s*$/i, '').trim()
-    
-    return {
+
+    // Initialize metadata with defaults
+    let metadata: Record<string, any> = {
         source: filename,
-        title: extractedTitle,
         category: category,
         subcategory: subcategory, // e.g., "aws", "terraform", "azure_gcp"
-        type: 'interviewer_reference', // More specific type
+        type: 'interviewer_reference',
         filePath: filePath,
-        // Add URL if it's a known source (can be extended)
-        url: getSourceUrl(category, title)
     }
+
+    // 1. Try to parse YAML Frontmatter
+    const frontmatterRegex = /^---\n([\s\S]*?)\n---/
+    const match = content.match(frontmatterRegex)
+
+    if (match) {
+        const frontmatterBlock = match[1]
+        // Simple manual YAML parsing for robustness without dependencies
+        // logic: match keys like "id: value" or "tags: [a, b]"
+
+        const lines = frontmatterBlock.split('\n')
+        for (const line of lines) {
+            const colonIndex = line.indexOf(':')
+            if (colonIndex > 0) {
+                const key = line.substring(0, colonIndex).trim()
+                let value = line.substring(colonIndex + 1).trim()
+
+                // Remove quotes if present
+                if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+                    value = value.substring(1, value.length - 1)
+                }
+
+                // Parse arrays like [a, b, c]
+                if (value.startsWith('[') && value.endsWith(']')) {
+                    const arrayContent = value.substring(1, value.length - 1)
+                    const arrayValues = arrayContent.split(',').map(v => v.trim().replace(/['"]/g, ''))
+                    metadata[key] = arrayValues.join(',') // Store as comma-separated string for simpler filter
+                } else {
+                    metadata[key] = value
+                }
+            }
+        }
+    }
+
+    // 2. Extract Title if not in frontmatter
+    if (!metadata.title) {
+        // Try to extract title from markdown 
+        if (content.startsWith('# ') || content.includes('\n# ')) {
+            const titleMatch = content.match(/^#\s+(.+)$/m)
+            if (titleMatch) {
+                title = titleMatch[1].trim()
+            }
+        }
+        metadata.title = title
+    }
+
+    // Clean up title (remove "Interviewer Reference" suffix if present)
+    metadata.title = String(metadata.title).replace(/\s*_?\s*Interviewer Reference\s*$/i, '').trim()
+
+    // Add URL if it's a known source
+    metadata.url = getSourceUrl(category, metadata.title)
+
+    return metadata
 }
 
 /**
@@ -149,7 +190,7 @@ function getSourceUrl(category: string, title: string): string | undefined {
         'ci-cd': 'https://www.jenkins.io/doc/',
         'sre': 'https://sre.google/',
     }
-    
+
     return urlMap[category.toLowerCase()]
 }
 
@@ -158,7 +199,7 @@ function getSourceUrl(category: string, title: string): string | undefined {
  */
 async function ingest() {
     console.log('🚀 Starting data ingestion to ChromaDB...\n')
-    
+
     // Check if data directory exists
     try {
         const stats = await stat(DATA_DIR)
@@ -172,51 +213,51 @@ async function ingest() {
         console.log('   Then add your .txt or .md files to these directories.')
         process.exit(1)
     }
-    
+
     // Load all files
     console.log(`📂 Loading files from ${DATA_DIR}...`)
     const files = await loadFilesFromDirectory(DATA_DIR)
-    
+
     if (files.length === 0) {
         console.warn('⚠️  No supported files found in data/knowledge-base/')
         console.log('\n💡 Supported formats: .txt, .md, .markdown')
         console.log('   Place your files in: data/knowledge-base/{category}/filename.ext')
         process.exit(0)
     }
-    
+
     console.log(`✅ Found ${files.length} file(s)\n`)
-    
+
     // Initialize vector store
     console.log('🔗 Connecting to ChromaDB...')
     const { getVectorStore } = await import('../src/lib/vector-store')
     const vectorStore = await getVectorStore()
     console.log('✅ Connected to ChromaDB\n')
-    
+
     // Process and ingest each file
     let totalChunks = 0
     const documents: Document[] = []
-    
+
     for (const file of files) {
         console.log(`📄 Processing: ${file.path}`)
-        
+
         const metadata = extractMetadata(file.path, file.category, file.content)
         const chunks = await splitText(file.content, metadata)
-        
+
         documents.push(...chunks)
         totalChunks += chunks.length
-        
+
         console.log(`   → Split into ${chunks.length} chunk(s)`)
     }
-    
+
     console.log(`\n📦 Total chunks to ingest: ${totalChunks}\n`)
-    
+
     // Ingest in batches to avoid memory issues
     const BATCH_SIZE = 100
     let ingested = 0
-    
+
     for (let i = 0; i < documents.length; i += BATCH_SIZE) {
         const batch = documents.slice(i, i + BATCH_SIZE)
-        
+
         try {
             await vectorStore.addDocuments(batch)
             ingested += batch.length
@@ -225,7 +266,7 @@ async function ingest() {
             console.error(`❌ Failed to ingest batch ${Math.floor(i / BATCH_SIZE) + 1}:`, error)
         }
     }
-    
+
     console.log(`\n🎉 Successfully ingested ${ingested} chunks from ${files.length} files!`)
     console.log('\n💡 Your knowledge base is now ready for RAG retrieval.')
 }

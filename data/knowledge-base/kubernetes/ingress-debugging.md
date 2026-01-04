@@ -1,3 +1,8 @@
+---
+id: debug-ingress-502-504-errors
+tags: [auto-tagged]
+---
+
 # Kubernetes ingress and DNS debugging guide
 
 ## Symptoms

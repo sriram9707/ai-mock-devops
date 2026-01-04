@@ -3,9 +3,12 @@ import styles from './page.module.css'
 import prisma from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { ArrowUpRight, BarChart3, Trophy } from 'lucide-react'
+import { ArrowUpRight, BarChart3, AlertCircle } from 'lucide-react'
 
-export default async function Dashboard() {
+export default async function Dashboard(props: { searchParams: Promise<{ message?: string }> }) {
+    const searchParams = await props.searchParams
+    const { message } = searchParams
+
     const user = await getSession()
     if (!user || !user.profile) {
         redirect('/onboarding')
@@ -17,13 +20,15 @@ export default async function Dashboard() {
         orderBy: { title: 'asc' }
     })
 
-    // Active packs (DevOps Entry, Senior, SRE)
+    // Active packs (DevOps Entry, Senior, SRE, AWS Architect)
     const activePacks = allPacks.filter(pack => {
         const role = pack.role.toLowerCase()
         const level = pack.level.toLowerCase()
+        const title = pack.title.toLowerCase()
         return (
             (role.includes('devops') && (level.includes('entry') || level.includes('senior'))) ||
-            role.includes('sre')
+            role.includes('sre') ||
+            (role.includes('architect') && title.includes('aws'))
         )
     })
 
@@ -31,9 +36,11 @@ export default async function Dashboard() {
     const comingSoonPacks = allPacks.filter(pack => {
         const role = pack.role.toLowerCase()
         const level = pack.level.toLowerCase()
+        const title = pack.title.toLowerCase()
         return !(
             (role.includes('devops') && (level.includes('entry') || level.includes('senior'))) ||
-            role.includes('sre')
+            role.includes('sre') ||
+            (role.includes('architect') && title.includes('aws'))
         )
     })
 
@@ -57,6 +64,13 @@ export default async function Dashboard() {
 
     return (
         <main className={styles.container}>
+            {message && (
+                <div className={styles.alert}>
+                    <AlertCircle size={20} />
+                    <p>{decodeURIComponent(message)}</p>
+                </div>
+            )}
+
             {/* Editorial Header */}
             <header className={`${styles.hero} animate-reveal`}>
                 <h1 className={styles.title}>
@@ -83,11 +97,14 @@ export default async function Dashboard() {
                     const attemptsLeft = order ? Math.min(2, order.attemptsTotal - order.attemptsUsed) : 0
 
                     // Check if pack is coming soon
+                    // Check if pack is coming soon
                     const role = pack.role.toLowerCase()
                     const level = pack.level.toLowerCase()
+                    const title = pack.title.toLowerCase()
                     const isComingSoon = !(
                         (role.includes('devops') && (level.includes('entry') || level.includes('senior'))) ||
-                        role.includes('sre')
+                        role.includes('sre') ||
+                        (role.includes('architect') && title.includes('aws'))
                     )
 
                     return (
@@ -135,15 +152,13 @@ export default async function Dashboard() {
                                         </button>
                                     </form>
                                 ) : (
-                                    <form action={async () => {
-                                        'use server'
-                                        await purchaseInterview(pack.id)
-                                    }}>
-                                        <button type="submit" className={styles.actionButton}>
-                                            Purchase
-                                            <ArrowUpRight className="btn-arrow" size={24} />
-                                        </button>
-                                    </form>
+                                    <Link
+                                        href={`/interview/${pack.id}/purchase`}
+                                        className={styles.actionButton}
+                                    >
+                                        Purchase
+                                        <ArrowUpRight className="btn-arrow" size={24} />
+                                    </Link>
                                 )}
                             </div>
                         </div>

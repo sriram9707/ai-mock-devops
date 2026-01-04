@@ -348,8 +348,9 @@ Example: "Strong performance in Kubernetes troubleshooting, correctly identifyin
 **Upskilling Plan**:
 - Must provide week-by-week breakdown
 - Each week must have 3-4 specific tasks
-- Tasks must be actionable (not vague like "practice more")
-- Include specific resources (documentation links, tutorials, courses)
+- Tasks must be actionable (e.g., "Deploy an EKS cluster using Terraform").
+- RESOURCE CITATION REQUIRED: For every item, verify existing official documentation (Kubernetes.io, AWS Docs, Terraform Registry) and provide the Exact Search Term or URL path (e.g., "kubernetes.io/docs/concepts/workloads/pods/").
+- DO NOT invent URLs. If unsure, use "Search Official Docs for [Term]".
 
 Return ONLY valid JSON in this exact format:
 {

@@ -38,6 +38,12 @@ export async function retrieveContext(query: string, roleLevel: string = 'Mid'):
  * Category-aware scenario retrieval for structured interviews
  * Retrieves scenarios organized by technology categories for deep, focused questioning
  */
+import { INTERVIEW_TOPICS } from './ai/interview-flow'
+
+/**
+ * Category-aware scenario retrieval for structured interviews
+ * Retrieves scenarios organized by technology categories for deep, focused questioning
+ */
 export async function retrieveCategoryScenarios(
     roleType: string,
     roleLevel: string,
@@ -45,35 +51,97 @@ export async function retrieveCategoryScenarios(
 ): Promise<{ category: string, scenarios: string[] }[]> {
     try {
         const vectorStore = await getVectorStore()
-
-        // Technology categories mapping
-        const categoryMap: Record<string, string[]> = {
-            'Kubernetes': ['Deployment Issues', 'Service & Networking', 'Storage Issues', 'RBAC & Security'],
-            'AWS': ['EC2 & Networking', 'S3 & Storage', 'VPC & Connectivity', 'EKS & Containers', 'IAM & Security'],
-            'Terraform': ['State Management', 'Resource Dependencies', 'Module Design'],
-            'CI/CD': ['Pipeline Failures', 'Deployment Strategies', 'GitOps Workflows']
-        }
-
-        // Detect tech stack from role or use candidate's mentioned tech
-        const techStack = candidateTech.length > 0 ? candidateTech :
-            (roleType.toLowerCase().includes('devops') ? ['Kubernetes', 'AWS', 'Terraform'] : ['AWS'])
-
         const results: { category: string, scenarios: string[] }[] = []
 
-        // Retrieve 2 scenarios per category
-        for (const tech of techStack.slice(0, 2)) { // Focus on 2 main technologies
-            const categories = categoryMap[tech] || [tech]
+        // 1. Identify relevant topics from INTERVIEW_TOPICS based on candidate tech or role
+        const relevantTopics = INTERVIEW_TOPICS.filter(topic => {
+            // Check if topic ID matches any candidate tech
+            const matchesTech = candidateTech.some(tech =>
+                tech.toLowerCase().includes(topic.id) ||
+                topic.name.toLowerCase().includes(tech.toLowerCase())
+            )
+            // Or if it's a core topic for the role (e.g. DevOps -> All topics usually apply)
+            const isCore = roleType.toLowerCase().includes('devops') || roleType.toLowerCase().includes('sre')
 
-            for (const category of categories.slice(0, 3)) { // 3 categories per tech
-                const query = `${tech} ${category} ${roleLevel} production incident scenario`
+            return matchesTech || isCore
+        })
+
+        // 2. Select top 3 relevant topics (Randomized to avoid repetition)
+        const selectedTopics = relevantTopics
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 3)
+
+        for (const topic of selectedTopics) {
+            // Get level-specific focus items from the user's curriculum
+            let focusItems: string[] = []
+            if (roleLevel.toLowerCase().includes('senior')) {
+                focusItems = topic.seniorLevelFocus
+            } else if (roleLevel.toLowerCase().includes('architect')) {
+                focusItems = topic.architectLevelFocus
+            } else {
+                focusItems = topic.entryLevelFocus
+            }
+
+            // Shuffle and pick 3 random focus items to keep it dynamic
+            const shuffledItems = focusItems.sort(() => 0.5 - Math.random()).slice(0, 3)
+
+            // HYBRID APPROACH: Use User's Topic + RAG Context
+            // We use the specific topic "StatefulSet Corruption" to search the Knowledge Base
+            const enrichedScenarios: string[] = []
+
+            for (const item of shuffledItems) {
+                // 1. Start with the user's specific instruction
+                let scenarioText = `Ask about: ${item}`
+
+                // 2. Fetch context from RAG (ID Match -> Vector Fallback)
+                try {
+                    // Strategy A: Try strict ID match first
+                    // "StatefulSet data corruption" -> "statefulset-data-corruption"
+                    const slug = item
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/^-+|-+$/g, '')
+
+                    // We use `similaritySearch` but filter extremely strictly by ID
+                    // Note: LangChain JS doesn't always support pure filter without query in all stores,
+                    // but we can pass the item as query + filter
+                    const idDocs = await vectorStore.similaritySearch(item, 1, { id: slug })
+
+                    if (idDocs.length > 0) {
+                        console.log(`✅ Found exact RAG match for ID: ${slug}`)
+                        const context = idDocs[0].pageContent.substring(0, 500)
+                        // Add explicit instruction that this is the GOLDEN ANSWER
+                        scenarioText += `\n[Official Troubleshooting Guide]: ${context}`
+                    } else {
+                        // Strategy B: Fallback to similarity search
+                        console.log(`⚠️ No ID match for ${slug}, falling back to similarity search`)
+                        const similarDocs = await vectorStore.similaritySearch(`${item} troubleshooting guide steps`, 1)
+                        if (similarDocs.length > 0) {
+                            const context = similarDocs[0].pageContent.substring(0, 300)
+                            scenarioText += `\n[Reference Context]: ${context}`
+                        }
+                    }
+                } catch (e) {
+                    console.warn(`Failed to fetch RAG context for ${item}`)
+                }
+
+                enrichedScenarios.push(scenarioText)
+            }
+
+            if (enrichedScenarios.length > 0) {
+                results.push({
+                    category: topic.name,
+                    scenarios: enrichedScenarios
+                })
+            }
+
+            // OPTIONAL: Fallback to purely RAG if no focus items existed in the static list
+            if (enrichedScenarios.length === 0) {
+                const query = `${topic.name} ${roleLevel} production incident scenario`
                 const docs = await vectorStore.similaritySearch(query, 2)
-
-                const scenarios = docs
-                    .filter(doc => doc.pageContent && doc.pageContent.length > 100)
-                    .map(doc => doc.pageContent.substring(0, 500)) // Limit length
-
-                if (scenarios.length > 0) {
-                    results.push({ category: `${tech}: ${category}`, scenarios })
+                const vectorScenarios = docs.map(d => d.pageContent.substring(0, 300))
+                if (vectorScenarios.length > 0) {
+                    results.push({ category: `${topic.name} (RAG)`, scenarios: vectorScenarios })
                 }
             }
         }

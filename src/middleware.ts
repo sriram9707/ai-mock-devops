@@ -11,6 +11,7 @@ const isPublicRoute = createRouteMatcher([
     '/api/elevenlabs(.*)',
     '/api/chat(.*)',
     '/chat/completions', // ElevenLabs endpoint
+    '/api/debug(.*)', // Debug endpoints
 ])
 
 // Admin routes require authentication (checked in page component)

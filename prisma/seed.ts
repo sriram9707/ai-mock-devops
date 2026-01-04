@@ -74,7 +74,7 @@ async function main() {
             ])
         },
         {
-            title: 'SRE - Incident Response',
+            title: 'SRE Engineer',
             role: 'SRE',
             level: 'Mid-Senior',
             durationMinutes: 45,
@@ -102,12 +102,12 @@ async function main() {
             ])
         },
         {
-            title: 'Cloud Architect - AWS Solution',
+            title: 'AWS Cloud Architect',
             role: 'Cloud Architect',
             level: 'Principal',
             durationMinutes: 60,
             price: 0,
-            description: 'High-level system design interview. Focuses on requirements gathering, trade-offs, and cost optimization.',
+            description: 'High-level system design interview. Focuses on requirements gathering, trade-offs, and cost optimization on AWS.',
             sections: JSON.stringify([
                 {
                     title: 'Requirements Gathering',
@@ -129,37 +129,65 @@ async function main() {
                 }
             ])
         },
-        // Company Specific Packs (The Moat)
         {
-            title: 'Google SRE - Non-Abstract Design',
-            role: 'Site Reliability Engineer',
-            level: 'Senior',
+            title: 'GCP Architect',
+            role: 'Cloud Architect',
+            level: 'Principal',
             durationMinutes: 60,
-            price: 15,
-            description: 'Simulates the famous Google "Non-Abstract Large System Design" (NALSD) interview. Focuses on practical scaling, SLIs/SLOs, and error budgets.',
+            price: 0,
+            description: 'High-level system design interview. Focuses on requirements gathering, trade-offs, and cost optimization on Google Cloud.',
             sections: JSON.stringify([
                 {
-                    title: 'NALSD Concept',
+                    title: 'Requirements Gathering',
                     duration: 10,
-                    competencies: ['system_design', 'google_culture'],
-                    questions: ['Design a distributed task scheduler for 1M QPS']
+                    competencies: ['requirements_analysis', 'stakeholder_management'],
+                    questions: ['Clarify the problem statement']
                 },
                 {
-                    title: 'Reliability Math',
-                    duration: 25,
-                    competencies: ['slos', 'error_budgets', 'capacity_planning'],
-                    questions: ['Calculate the error budget for 99.99% availability over a quarter']
+                    title: 'Architecture Design',
+                    duration: 30,
+                    competencies: ['system_design', 'gcp_services', 'scalability'],
+                    questions: ['Design a Global Spanner-based architecture']
                 },
                 {
-                    title: 'Trade-offs',
-                    duration: 25,
-                    competencies: ['operational_load', 'complexity_management'],
-                    questions: ['Consistency vs Availability in a global lock service']
+                    title: 'Trade-offs & Cost',
+                    duration: 20,
+                    competencies: ['cost_optimization', 'operational_excellence'],
+                    questions: ['Cloud Run vs GKE? Cost vs Latency?']
                 }
             ])
         },
         {
-            title: 'Netflix - Chaos Engineering',
+            title: 'Azure Architect',
+            role: 'Cloud Architect',
+            level: 'Principal',
+            durationMinutes: 60,
+            price: 0,
+            description: 'High-level system design interview. Focuses on requirements gathering, trade-offs, and cost optimization on Azure.',
+            sections: JSON.stringify([
+                {
+                    title: 'Requirements Gathering',
+                    duration: 10,
+                    competencies: ['requirements_analysis', 'stakeholder_management'],
+                    questions: ['Clarify the problem statement']
+                },
+                {
+                    title: 'Architecture Design',
+                    duration: 30,
+                    competencies: ['system_design', 'azure_services', 'scalability'],
+                    questions: ['Design a multi-region architecture using AKS and CosmosDB']
+                },
+                {
+                    title: 'Trade-offs & Cost',
+                    duration: 20,
+                    competencies: ['cost_optimization', 'operational_excellence'],
+                    questions: ['App Service vs AKS? Cost vs Latency?']
+                }
+            ])
+        },
+        // Company Specific Packs (The Moat)
+        {
+            title: 'Chaos Engineering',
             role: 'Chaos Engineer',
             level: 'Senior',
             durationMinutes: 45,

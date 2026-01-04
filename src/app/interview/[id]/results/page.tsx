@@ -84,6 +84,11 @@ export default async function ResultsPage({ params }: { params: Promise<{ id: st
                 </div>
             )
         }
+
+        if (session.status === 'ABANDONED') {
+            redirect('/dashboard?message=Interview+ended+too+early.+Your+attempt+has+been+refunded.+Please+ensure+your+microphone+is+working+before+trying+again.')
+        }
+
         notFound()
     }
 

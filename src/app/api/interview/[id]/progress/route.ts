@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getSession } from '@/lib/auth'
+import { auth } from '@clerk/nextjs/server'
 import { getInterviewProgress } from '@/lib/interview-progress'
 import prisma from '@/lib/prisma'
 
@@ -8,12 +8,13 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params
-        const user = await getSession()
+        const { userId } = await auth()
 
-        if (!user) {
+        if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        const { id } = await params
 
         // Verify user owns this session
         const session = await prisma.interviewSession.findUnique({
@@ -21,7 +22,7 @@ export async function GET(
             select: { userId: true }
         })
 
-        if (!session || session.userId !== user.id) {
+        if (!session || session.userId !== userId) {
             return NextResponse.json({ error: 'Session not found' }, { status: 404 })
         }
 

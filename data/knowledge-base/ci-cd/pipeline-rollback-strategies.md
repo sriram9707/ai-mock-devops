@@ -1,3 +1,8 @@
+---
+id: failed-rollback-scenarios
+tags: [auto-tagged]
+---
+
 # CI/CD pipeline rollback strategies (interviewer reference)
 
 ## Common failure modes to simulate

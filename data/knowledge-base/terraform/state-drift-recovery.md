@@ -1,3 +1,8 @@
+---
+id: terraform-state-corruption-at-scale-affecting-multiple-teams
+tags: [auto-tagged]
+---
+
 # Terraform state drift and recovery playbook
 
 ## Symptoms of drift

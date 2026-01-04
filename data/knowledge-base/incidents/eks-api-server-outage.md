@@ -1,3 +1,8 @@
+---
+id: eks-api-server-latency-outage
+tags: [auto-tagged]
+---
+
 # EKS API server outage runbook (incident reference)
 
 ## Scenario summary

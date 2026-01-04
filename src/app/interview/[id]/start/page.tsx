@@ -26,24 +26,26 @@ export default async function StartInterviewPage({ params }: { params: Promise<{
                             className={styles.textarea}
                             placeholder="Paste Job Description here..."
                             rows={10}
+                            required
                         />
                     </div>
 
                     {/* Practice Mode Toggle */}
-                    <div className={styles.practiceMode}>
-                        <label className={styles.checkboxLabel}>
-                            <input
-                                type="checkbox"
-                                name="isPractice"
-                                value="true"
-                                className={styles.checkbox}
-                            />
-                            <span>Practice Mode</span>
-                        </label>
-                        <p className={styles.practiceHint}>
-                            Practice mode: No scoring, can restart anytime. Perfect for learning!
-                        </p>
-                    </div>
+                    <label className={styles.toggleLabel}>
+                        <input
+                            type="checkbox"
+                            name="isPractice"
+                            value="true"
+                            className={styles.toggleInput}
+                        />
+                        <span className={styles.toggleSwitch} />
+                        <div className={styles.toggleText}>
+                            <span className={styles.toggleTitle}>Enable Practice Mode</span>
+                            <span className={styles.toggleDesc}>
+                                No scoring, unstressed environment. Restart anytime.
+                            </span>
+                        </div>
+                    </label>
 
                     <div className={styles.actions}>
                         <button type="submit" className={styles.primaryButton}>
@@ -55,6 +57,7 @@ export default async function StartInterviewPage({ params }: { params: Promise<{
                             type="submit"
                             formAction={skipJD}
                             className={styles.secondaryButton}
+                            formNoValidate
                         >
                             Skip (Generic Interview)
                         </button>

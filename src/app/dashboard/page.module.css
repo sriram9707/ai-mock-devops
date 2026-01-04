@@ -58,6 +58,33 @@
     transition: all var(--transition-fast);
 }
 
+.alert {
+    max-width: 1280px;
+    margin: 0 auto 2rem;
+    padding: 1rem 1.5rem;
+    background: #FEFCE8;
+    /* Light yellow for warnings */
+    border: 1px solid #FEF08A;
+    border-radius: var(--radius-md);
+    color: #854D0E;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .navButton:hover {
     background: var(--gray-50);
     border-color: var(--primary);

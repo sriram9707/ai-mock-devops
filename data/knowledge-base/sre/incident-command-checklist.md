@@ -1,3 +1,8 @@
+---
+id: basic-incident-response
+tags: [auto-tagged]
+---
+
 # SRE incident command checklist
 
 ## Roles and comms

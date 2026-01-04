@@ -36,7 +36,7 @@ export async function purchaseInterview(packId: string) {
     })
 
     logger.userAction(user.id, 'purchase_interview', { packId: pack.id, packTitle: pack.title, amount: pack.price })
-    redirect(`/interview/${session.id}/purchase`)
+    redirect(`/interview/${session.id}/start`)
 }
 
 export async function startNewAttempt(packId: string) {
