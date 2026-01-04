@@ -15,12 +15,12 @@ async function runSimulation() {
     console.log('🚀 Starting Interview Simulation (Inspiration Mode)...\n')
 
     // 1. Setup Context
-    // Testing CI/CD Mandate
+    // Testing Ingested GitHub Actions Content
     const selectedTopics = ['cicd']
-    console.log(`📌 Selected Topics for CI/CD Mandate: ${selectedTopics.join(', ')}`)
+    console.log(`📌 Selected Topics for GH Actions: ${selectedTopics.join(', ')}`)
 
-    // Emulate retrieval
-    const ragScenarios = await retrieveCategoryScenarios('devops-engineer', 'senior', ['jenkins', 'git', 'docker'])
+    // Emulate retrieval - Query specific to the new file content
+    const ragScenarios = await retrieveCategoryScenarios('devops-engineer', 'senior', ['github-actions', 'cicd'])
 
     // Construct System Prompt (Simplified from route.ts)
     const systemPromptBase = `You are Alex, an expert Senior DevOps Interviewer.

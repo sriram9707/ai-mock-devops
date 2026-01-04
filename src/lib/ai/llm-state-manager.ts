@@ -164,8 +164,10 @@ Generate a sharp, specific question that:
 4. IMPORTANT: If the candidate just answered a similar question, DO NOT ask it again.Pivot to a related trade - off, edge case, or a completely new aspect.
 5. If action is "drill_down", challenge their specific implementation details or trade - offs.
 6. CONTEXT USAGE: Use any provided "[Official Troubleshooting Guide]" or source material as INSPIRATION. Use the concepts to ground your scenario, but feel free to be creative, conversational, and adapt the question to the flow. Do not be rigid.
-7. STYLE GUARD: For Senior/Architect roles (Depth >= 3), avoid "What is...?" questions. 
-   - Ask: "Tell me about a time you...", "How have you handled...", "Walk me through your architecture for...".
+7. TECHNICAL DEPTH (NO HR-STYLE): Avoid generic "Tell me about a time..." questions for technical topics. 
+   - Ask for ARCHITECTURE: "How do you design the branching strategy for 50 microservices?"
+   - Ask for TRADE-OFFS: "Why choose Helm over Kustomize for this?"
+   - Ask for SCENARIOS with CONSTRAINTS: "You have 10 minutes to rollback. How do you do it?"
 8. TOPIC COHERENCE: Focus on one primary technical domain per question. Do not force unrelated tools together (e.g. Jenkins and Runtime 502 Errors). If asking about a tool, stick to its specific scope.
 9. CI/CD MANDATES: When the topic is CI/CD, you MUST ask about: Branching Strategies (GitFlow vs Trunk), Docker Image Versioning strategies (Semantic vs SHA), or Hotfix/Rollback workflows.
 
